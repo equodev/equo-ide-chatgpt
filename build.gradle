@@ -1,0 +1,63 @@
+plugins {
+	id 'com.diffplug.blowdryer'
+	id 'com.diffplug.spotless-changelog'
+}
+
+ext.maven_name='ChatGPT plugin for EquoIDE'
+ext.maven_artifact = 'equo-ide-chatgpt'
+ext.maven_desc='ChatGPT plugin for EquoIDE'
+
+apply from: 干.file('changelog.gradle')
+
+apply plugin: 'java'
+apply plugin: 'com.adarshr.test-logger'
+sourceCompatibility = java_compat
+targetCompatibility = java_compat
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+}
+
+apply from: 干.file('spotless.gradle')
+
+jar.manifest.attributes(
+		'Bundle-SymbolicName':    'dev.equo.ide.chatgpt; singleton:=true',
+		'Bundle-Version':         '0.0.0',
+		'Implementation-Version': spotlessChangelog.versionNext)
+
+repositories {
+	maven {
+		url 'https://dl.equo.dev/chromium-swt-ee/equo-gpl/mvn'
+	}
+}
+
+import com.diffplug.common.swt.os.SwtPlatform
+
+dependencies {
+	compileOnly "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
+	testImplementation "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
+	testImplementation "com.equo:com.equo.chromium.cef.${SwtPlatform.getRunning()}:$VER_EQUO_CHROMIUM"
+	implementation "com.diffplug.durian:durian-swt:$VER_DURIAN_SWT"
+	testImplementation "org.junit.jupiter:junit-jupiter:$VER_JUNIT"
+	testImplementation "org.assertj:assertj-core:$VER_ASSERTJ"
+}
+String VERSION = '4.27'
+apply plugin: 'dev.equo.p2deps'
+p2deps {
+	into 'compileOnly', {
+		p2repo "https://download.eclipse.org/eclipse/updates/${VERSION}/"
+		install 'org.eclipse.ui.ide.application'
+	}
+	into 'testImplementation', {
+		p2repo "https://download.eclipse.org/eclipse/updates/${VERSION}/"
+		install 'org.eclipse.platform.ide.categoryIU'
+	}
+}
+
+apply from: 干.file('maven.gradle')
+apply from: 干.file('sonatype.gradle')
+test {
+	useJUnitPlatform()
+	if (com.diffplug.common.swt.os.OS.getNative().isMac()) {
+		jvmArgs = ['-XstartOnFirstThread']
+	}
+}
