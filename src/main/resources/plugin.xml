@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+    <extension point="org.eclipse.ui.views">
+        <view id="dev.equo.chatgpt.view"
+            name="Label View"
+            class="dev.equo.chatgpt.ChatGptView"
+            icon="icons\openai.png"/>
+    </extension>
+</plugin>

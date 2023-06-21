@@ -57,3 +57,8 @@ test {
 		jvmArgs = ['-XstartOnFirstThread']
 	}
 }
+
+apply plugin: 'dev.equo.ide'
+equoIde {
+	gradleBuildship().autoImport('.')
+}

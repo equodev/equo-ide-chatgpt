@@ -35,4 +35,5 @@ blowdryerSetup {
 	repoSubfolder ''
 	devLocal '../equo-ide/gradle/blowdryer-scripts'
 }
-rootProject.name = 'equo-ide-chat-gpt'
+rootProject.name = 'equo-ide-chatgpt'
+includeBuild '../equo-ide'
