@@ -3,10 +3,6 @@ plugins {
 	id 'com.diffplug.spotless-changelog'
 }
 
-ext.maven_name='ChatGPT plugin for EquoIDE'
-ext.maven_artifact = 'equo-ide-chatgpt'
-ext.maven_desc='ChatGPT plugin for EquoIDE'
-
 apply from: 干.file('changelog.gradle')
 
 apply plugin: 'java'
