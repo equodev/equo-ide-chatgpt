@@ -36,8 +36,9 @@ plugins {
 	id 'com.diffplug.eclipse.mavencentral'          apply false
 }
 blowdryerSetup {
-	repoSubfolder ''
-	devLocal '../equo-ide/gradle/blowdryer-scripts'
+	repoSubfolder 'gradle/blowdryer-scripts'
+	github 'equodev/equo-ide', 'tag', 'solstice/1.5.0'
+	// devLocal '../equo-ide'
 }
 rootProject.name = 'equo-ide-chatgpt'
 includeBuild '../equo-ide'
