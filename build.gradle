@@ -1,6 +1,7 @@
 plugins {
 	id 'com.diffplug.blowdryer'
 	id 'com.diffplug.spotless-changelog'
+	id 'dev.equo.p2deps'                            version '1.4.0'
 }
 
 apply from: 干.file('changelog.gradle')
@@ -18,6 +19,7 @@ apply from: 干.file('spotless.gradle')
 jar.manifest.attributes(
 		'Bundle-SymbolicName':    'dev.equo.ide.chatgpt; singleton:=true',
 		'Bundle-Version':         '0.0.0',
+		'Bundle-ManifestVersion': '2',
 		'Implementation-Version': spotlessChangelog.versionNext)
 
 repositories {
@@ -32,6 +34,7 @@ dependencies {
 	compileOnly "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
 	testImplementation "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
 	testImplementation "com.equo:com.equo.chromium.cef.${SwtPlatform.getRunning()}:$VER_EQUO_CHROMIUM"
+	implementation "dev.equo.ide:solstice:$VER_SOLSTICE"
 	implementation "com.diffplug.durian:durian-swt:$VER_DURIAN_SWT"
 	testImplementation "org.junit.jupiter:junit-jupiter:$VER_JUNIT"
 	testImplementation "org.assertj:assertj-core:$VER_ASSERTJ"
@@ -60,5 +63,6 @@ test {
 
 apply plugin: 'dev.equo.ide'
 equoIde {
-	gradleBuildship().autoImport('.')
+	gradleBuildship()
+	dogfood().testHook('dev.equo.ide.chatgpt.ChatGptIdeHook')
 }
