@@ -60,6 +60,9 @@ test {
 	if (com.diffplug.common.swt.os.OS.getNative().isMac()) {
 		jvmArgs = ['-XstartOnFirstThread']
 	}
+	if (System.getenv('CI') != null) {
+		systemProperty 'com.diffplug.test.autoclose.milliseconds', '500'
+	}
 }
 
 apply plugin: 'dev.equo.ide'
