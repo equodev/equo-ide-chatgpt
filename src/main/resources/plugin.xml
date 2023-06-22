@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
-    <extension point="org.eclipse.ui.views">
-        <view id="dev.equo.chatgpt.view"
-            name="Label View"
-            class="dev.equo.chatgpt.ChatGptView"
-            icon="icons\openai.png"/>
+    <!-- integration of Gradle views -->
+    <extension
+            point="org.eclipse.ui.views">
+        <view
+                id="dev.equo.ide.chatgpt.views.browser"
+                class="dev.equo.ide.chatgpt.ChatGptView"
+                category="dev.equo.ide.chatgpt.ui.views"
+                icon="icons/openai.png"
+                name="ChatGPT"
+                restorable="true">
+        </view>
+        <category
+                id="dev.equo.ide.chatgpt.ui.views"
+                name="ChatGPT">
+        </category>
     </extension>
 </plugin>
