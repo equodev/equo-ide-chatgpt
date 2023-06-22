@@ -1,7 +1,6 @@
 plugins {
 	id 'com.diffplug.blowdryer'
 	id 'com.diffplug.spotless-changelog'
-	id 'dev.equo.p2deps'                            version '1.4.0'
 }
 
 apply from: 干.file('changelog.gradle')
@@ -59,6 +58,9 @@ test {
 	useJUnitPlatform()
 	if (com.diffplug.common.swt.os.OS.getNative().isMac()) {
 		jvmArgs = ['-XstartOnFirstThread']
+	}
+	if (System.getenv('CI') != null) {
+		systemProperty 'com.diffplug.test.autoclose.milliseconds', '500'
 	}
 }
 

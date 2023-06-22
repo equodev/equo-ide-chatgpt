@@ -1,0 +1,41 @@
+# GITHUB_TOKEN
+# NEXUS_USER (base64)
+# NEXUS_PASS (base64)
+# GPG_PASSPHRASE (base64)
+# GPG_KEY (base64)
+#   gpg --export-secret-keys --armor KEY_ID | openssl base64 | pbcopy
+
+name: deploy
+on:
+  workflow_dispatch:
+    inputs:
+      to_publish:
+        description: 'What to publish'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: deploy
+    env:
+      gh_token: ${{ secrets.EQUO_IDE_GITHUB }}
+      ORG_GRADLE_PROJECT_nexus_user: ${{ secrets.NEXUS_USER }}
+      ORG_GRADLE_PROJECT_nexus_pass: ${{ secrets.NEXUS_PASS }}
+      ORG_GRADLE_PROJECT_gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      ORG_GRADLE_PROJECT_gpg_key64: ${{ secrets.GPG_KEY }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: jdk 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: 11
+          distribution: 'temurin'
+      - name: gradle caching
+        uses: gradle/gradle-build-action@v2
+      - name: publish all
+        if: "${{ github.event.inputs.to_publish == 'all' }}"
+        run: |
+          ./gradlew :changelogPush -Prelease=true --stacktrace --warning-mode all
