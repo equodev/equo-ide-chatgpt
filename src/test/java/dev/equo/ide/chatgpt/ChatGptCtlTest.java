@@ -19,7 +19,7 @@
  * Contributors:
  *     EquoTech, Inc. - initial API and implementation
  *******************************************************************************/
-package dev.equo.chatgpt;
+package dev.equo.ide.chatgpt;
 
 import com.diffplug.common.swt.InteractiveTest;
 import com.diffplug.common.swt.Layouts;
