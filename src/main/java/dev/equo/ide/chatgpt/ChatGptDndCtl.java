@@ -39,7 +39,7 @@ public class ChatGptDndCtl extends ControlWrapper.AroundControl<Composite> {
 	public ChatGptDndCtl(Composite parent) {
 		super(new Composite(parent, SWT.NONE));
 		Layouts.setGrid(wrapped).margin(0);
-		var group = new Group(wrapped, SWT.BORDER | SWT.SHADOW_ETCHED_IN);
+		var group = new Composite(wrapped, SWT.BORDER);
 		Layouts.setGridData(group).grabHorizontal();
 		Layouts.setFill(group);
 		var label = new Label(group, SWT.NONE);
