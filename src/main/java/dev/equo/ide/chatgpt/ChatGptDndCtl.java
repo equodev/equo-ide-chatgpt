@@ -25,6 +25,9 @@ import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
 import com.diffplug.common.swt.dnd.DndOp;
 import com.diffplug.common.swt.dnd.StructuredDrop;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -52,6 +55,28 @@ public class ChatGptDndCtl extends ControlWrapper.AroundControl<Composite> {
 						text -> {
 							ctl.setPrompt(ensureEndsWithBlankline(ctl.getPrompt()) + text.trim());
 						}));
+		drop.addFile(
+				StructuredDrop.handler(
+						DndOp.COPY,
+						files -> {
+							for (var file : files) {
+								try {
+									String content =
+											new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8)
+													.replace("\r", "")
+													.trim();
+									ctl.setPrompt(
+											ensureEndsWithBlankline(ctl.getPrompt())
+													+ "```"
+													+ gfmType(file.getName())
+													+ "\n"
+													+ content
+													+ "\n```\n");
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+						}));
 		drop.applyTo(label, group);
 	}
 
@@ -62,6 +87,20 @@ public class ChatGptDndCtl extends ControlWrapper.AroundControl<Composite> {
 			return str + "\n";
 		} else {
 			return str + "\n\n";
+		}
+	}
+
+	private static String gfmType(String filename) {
+		if (filename.endsWith(".java")) {
+			return "java";
+		} else {
+			var lastDot = filename.lastIndexOf('.');
+			var lastSlash = filename.replace('\\', '/').lastIndexOf('/');
+			if (lastDot > 0 && lastSlash >= 0) {
+				return filename.substring(lastSlash + 1, lastDot);
+			} else {
+				return "";
+			}
 		}
 	}
 }
