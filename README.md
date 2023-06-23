@@ -1,5 +1,8 @@
 # ChatGPT plugin for Eclipse / [EquoIDE](https://github.com/equodev/equo-ide)
 
+[![Maven Plugin](https://img.shields.io/maven-central/v/dev.equo.ide/equo-ide-chatgpt?color=blue&label=dev.equo.ide%3Aequo-ide-chatgpt)](https://search.maven.org/artifact/dev.equo.ide/equo-ide-chatgpt)
+[![Changelog](https://img.shields.io/badge/changelog-here-blue)](CHANGELOG.md)
+
 This plugin makes it easy to use ChatGPT as a coding assistant with Eclipse. You do not need an OpenAI API key, and if you are a ChatGPT Plus subscriber then you can already use GPT4, which in our experience is currently far more useful than the other available chat engines.
 
 You can drag files from the package explorer and drop them right into prompts. For a demo of this plugin in action along with GitHub Copilot-style autocompletion provided by Tabnine, see [equo-ide-ai-example](https://github.com/equodev/equo-ide-ai-example).
@@ -13,7 +16,7 @@ This plugin is currently available on MavenCentral (TODO), but [not yet publishe
 It is included in the EquoIDE plugin [catalog](https://github.com/equodev/equo-ide/blob/main/CATALOG.md#chatgpt), so you can install it like so in Gradle and maven
 
 ```gradle
-equoIde {    // in maven: <equoIde>
+equoIde {    // in maven: <configuration>
   chatGpt()  //             <chatGpt/>
 ```
 
