@@ -17,9 +17,16 @@ apply from: 干.file('spotless.gradle')
 
 jar.manifest.attributes(
 		'Bundle-SymbolicName':    'dev.equo.ide.chatgpt; singleton:=true',
-		'Bundle-Version':         '0.0.0',
-		'Bundle-ManifestVersion': '2',
+		'Bundle-Version':         spotlessChangelog.versionNext,
 		'Implementation-Version': spotlessChangelog.versionNext)
+
+// compile and test against the eclipse platform
+apply plugin: 'dev.equo.p2deps'
+p2deps {
+	into (['compileOnly', 'testImplementation'], {
+		platform()
+	})
+}
 
 repositories {
 	maven {
@@ -34,22 +41,9 @@ dependencies {
 	testImplementation "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
 	testImplementation "com.equo:com.equo.chromium.cef.${SwtPlatform.getRunning()}:$VER_EQUO_CHROMIUM"
 	implementation "dev.equo.ide:solstice:$VER_SOLSTICE"
-	implementation "com.diffplug.durian:durian-collect:1.2.0"
 	implementation "com.diffplug.durian:durian-swt:$VER_DURIAN_SWT"
 	testImplementation "org.junit.jupiter:junit-jupiter:$VER_JUNIT"
 	testImplementation "org.assertj:assertj-core:$VER_ASSERTJ"
-}
-String VERSION = '4.27'
-apply plugin: 'dev.equo.p2deps'
-p2deps {
-	into 'compileOnly', {
-		p2repo "https://download.eclipse.org/eclipse/updates/${VERSION}/"
-		install 'org.eclipse.ui.ide.application'
-	}
-	into 'testImplementation', {
-		p2repo "https://download.eclipse.org/eclipse/updates/${VERSION}/"
-		install 'org.eclipse.platform.ide.categoryIU'
-	}
 }
 
 apply from: 干.file('maven.gradle')
