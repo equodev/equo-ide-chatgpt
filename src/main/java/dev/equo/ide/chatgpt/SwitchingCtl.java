@@ -24,9 +24,10 @@ package dev.equo.ide.chatgpt;
 import com.diffplug.common.swt.CoatMux;
 import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
+import com.diffplug.common.swt.SwtMisc;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Link;
 
 public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 
@@ -58,18 +59,20 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 
 	static class GptWrapperCtl extends ControlWrapper.AroundControl<Composite> {
 		final ChatGptCtl ctl;
-		final Link switchTemplates;
+		final Button switchTemplates;
 
 		public GptWrapperCtl(Composite parent) {
 			super(new Composite(parent, SWT.NONE));
-			Layouts.setGrid(wrapped);
+			Layouts.setGrid(wrapped).numColumns(2);
 
 			ctl = new ChatGptCtl(wrapped);
-			Layouts.setGridData(ctl).grabAll();
+			Layouts.setGridData(ctl).horizontalSpan(2).grabAll();
 
-			switchTemplates = new Link(wrapped, SWT.NONE);
-			switchTemplates.setText("<a>Switch to templates</a>");
-			Layouts.setGridData(switchTemplates).grabHorizontal();
+			Layouts.newGridPlaceholder(wrapped).grabHorizontal();
+
+			switchTemplates = new Button(wrapped, SWT.PUSH | SWT.FLAT);
+			switchTemplates.setText("New question");
+			Layouts.setGridData(switchTemplates).widthHint(SwtMisc.defaultButtonWidth());
 		}
 	}
 }
