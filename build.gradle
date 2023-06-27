@@ -23,7 +23,10 @@ jar.manifest.attributes(
 // compile and test against the eclipse platform
 apply plugin: 'dev.equo.p2deps'
 p2deps {
-	into (['compileOnly', 'testImplementation'], {
+	into ([
+		'compileOnly',
+		'testImplementation'
+	], {
 		platform()
 	})
 }
@@ -42,6 +45,7 @@ dependencies {
 	testImplementation "com.equo:com.equo.chromium.cef.${SwtPlatform.getRunning()}:$VER_EQUO_CHROMIUM"
 	implementation "dev.equo.ide:solstice:$VER_SOLSTICE"
 	implementation "com.diffplug.durian:durian-swt:$VER_DURIAN_SWT"
+	implementation "com.diffplug.durian:durian-collect:1.2.0"
 	testImplementation "org.junit.jupiter:junit-jupiter:$VER_JUNIT"
 	testImplementation "org.assertj:assertj-core:$VER_ASSERTJ"
 }
@@ -61,6 +65,6 @@ test {
 apply plugin: 'dev.equo.ide'
 equoIde {
 	gradleBuildship().autoImport('.')
-	useChromium()
+	equoChromium()
 	dogfood().ideHook('dev.equo.ide.chatgpt.ChatGptIdeHook')
 }
