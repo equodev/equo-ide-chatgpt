@@ -40,6 +40,7 @@ repositories {
 
 import com.diffplug.common.swt.os.SwtPlatform
 
+String VER_DURIAN = '1.2.0'
 dependencies {
 	compileOnly "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
 	testImplementation "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
@@ -47,8 +48,9 @@ dependencies {
 	implementation "dev.equo.ide:solstice:$VER_SOLSTICE"
 	implementation "com.diffplug.durian:durian-swt:$VER_DURIAN_SWT"
 	implementation "com.diffplug.durian:durian-rx:4.0.1"
-	implementation "com.diffplug.durian:durian-collect:1.2.0"
-	implementation "com.diffplug.durian:durian-concurrent:1.2.0"
+	implementation "com.diffplug.durian:durian-core:$VER_DURIAN"
+	implementation "com.diffplug.durian:durian-collect:$VER_DURIAN"
+	implementation "com.diffplug.durian:durian-concurrent:$VER_DURIAN"
 	testImplementation "org.junit.jupiter:junit-jupiter:$VER_JUNIT"
 	testImplementation "org.assertj:assertj-core:$VER_ASSERTJ"
 }
