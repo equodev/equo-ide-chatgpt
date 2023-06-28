@@ -17,6 +17,7 @@ apply from: 干.file('spotless.gradle')
 
 jar.manifest.attributes(
 		'Bundle-SymbolicName':    'dev.equo.ide.chatgpt; singleton:=true',
+		'Bundle-IdeHook':         'dev.equo.ide.chatgpt.ChatGptIdeHook',
 		'Bundle-Version':         spotlessChangelog.versionNext,
 		'Implementation-Version': spotlessChangelog.versionNext)
 
@@ -66,5 +67,5 @@ apply plugin: 'dev.equo.ide'
 equoIde {
 	gradleBuildship().autoImport('.')
 	equoChromium()
-	dogfood().ideHook('dev.equo.ide.chatgpt.ChatGptIdeHook')
+	dogfood()
 }
