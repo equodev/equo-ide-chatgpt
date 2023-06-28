@@ -63,14 +63,17 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 
 		public GptWrapperCtl(Composite parent) {
 			super(new Composite(parent, SWT.NONE));
-			Layouts.setGrid(wrapped).numColumns(2);
+			Layouts.setGrid(wrapped).margin(0);
 
 			ctl = new ChatGptCtl(wrapped);
 			Layouts.setGridData(ctl).horizontalSpan(2).grabAll();
 
-			Layouts.newGridPlaceholder(wrapped).grabHorizontal();
+			var bottomPanel = new Composite(wrapped, SWT.NONE);
+			Layouts.setGridData(bottomPanel).grabHorizontal();
+			Layouts.setGrid(bottomPanel).numColumns(2);
+			Layouts.newGridPlaceholder(bottomPanel).grabHorizontal();
 
-			switchTemplates = new Button(wrapped, SWT.PUSH | SWT.FLAT);
+			switchTemplates = new Button(bottomPanel, SWT.PUSH | SWT.FLAT);
 			switchTemplates.setText("New question");
 			Layouts.setGridData(switchTemplates).widthHint(SwtMisc.defaultButtonWidth());
 		}

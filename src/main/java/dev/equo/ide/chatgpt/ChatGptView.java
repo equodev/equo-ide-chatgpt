@@ -25,11 +25,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
 public class ChatGptView extends ViewPart {
-	private ChatGptDndCtl ctl;
+	private SwitchingCtl ctl;
 
 	@Override
 	public void createPartControl(Composite parent) {
-		ctl = new ChatGptDndCtl(parent);
+		ctl = new SwitchingCtl(parent);
 	}
 
 	@Override

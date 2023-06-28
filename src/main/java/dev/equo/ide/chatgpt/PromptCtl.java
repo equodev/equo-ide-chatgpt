@@ -42,16 +42,8 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		super(new Composite(parent, SWT.NONE));
 		Layouts.setGrid(wrapped).spacing(0);
 
-		var topPanel = new Composite(wrapped, SWT.NONE);
-		Layouts.setGridData(topPanel).grabHorizontal();
-		Layouts.setGrid(topPanel).numColumns(2).margin(0);
-
-		var prefaceLbl = new Label(topPanel, SWT.NONE);
+		var prefaceLbl = new Label(wrapped, SWT.NONE);
 		prefaceLbl.setText("Preface");
-
-		switchToBrowser = new Link(topPanel, SWT.NONE);
-		switchToBrowser.setText("<a>Switch to browser</a>");
-		Layouts.setGridData(switchToBrowser).grabHorizontal().horizontalAlignment(SWT.RIGHT);
 
 		prefaceCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
 		prefaceCombo.add("Java expert");
@@ -67,7 +59,6 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		Layouts.setGridData(templateCombo).grabHorizontal();
 
 		templateTxt = new Text(wrapped, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		// Layouts.setGridData(templateTxt).heightHint(SwtMisc.scaleByFontHeight(5)).grabHorizontal();
 		Layouts.setGridData(templateTxt).grabAll();
 
 		dragFileCtl = new DragFileCtl(wrapped);
@@ -77,7 +68,9 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		Layouts.setGridData(askBar).grabHorizontal();
 		Layouts.setGrid(askBar).margin(0).numColumns(2);
 
-		Layouts.newGridPlaceholder(askBar).grabHorizontal();
+		switchToBrowser = new Link(askBar, SWT.NONE);
+		switchToBrowser.setText("<a>Open browser</a>");
+		Layouts.setGridData(switchToBrowser).grabHorizontal().verticalAlignment(SWT.BOTTOM);
 
 		var askBtn = new Button(askBar, SWT.PUSH | SWT.FLAT);
 		askBtn.setText("Get answer");
