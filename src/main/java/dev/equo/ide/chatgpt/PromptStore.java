@@ -22,7 +22,7 @@
 package dev.equo.ide.chatgpt;
 
 import com.diffplug.common.base.Errors;
-import java.util.Collection;
+import java.util.List;
 import java.util.TreeMap;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.Preferences;
@@ -30,7 +30,11 @@ import org.osgi.service.prefs.Preferences;
 public abstract class PromptStore {
 	public enum Type {
 		PREFACE,
-		TEMPLATE
+		TEMPLATE;
+
+		public <T> T prefaceTemplate(T preface, T template) {
+			return this == PREFACE ? preface : template;
+		}
 	}
 
 	static PromptStore get() {
@@ -57,7 +61,7 @@ public abstract class PromptStore {
 
 		@Override
 		Sub get(Type type) {
-			return type == Type.PREFACE ? prefaces : templates;
+			return type.prefaceTemplate(prefaces, templates);
 		}
 	}
 
@@ -69,7 +73,7 @@ public abstract class PromptStore {
 								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a concise answer. Wherever possible, respond only in code without any explanation.")
 						.put(
 								"Java verbose",
-								"You are an expert Java developer. For the question below, please think carefully, work step by step and provide a detailed answer. Describe the reasoning for your answer.")
+								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a detailed answer. Describe the reasoning for your answer.")
 						.put("(None)", "");
 
 		private final Sub templates =
@@ -79,7 +83,7 @@ public abstract class PromptStore {
 						.put("Test JUnit 4", "Write a test for the following class using JUnit 4.")
 						.put(
 								"Modernize",
-								"Rewrite the following class using the latest syntax constructs from Java 11. Examples to modernize:\n"
+								"Rewrite the following class using the latest syntax constructs from Java 11. Examples to modernize:\n\n"
 										+ "- use `var` instead of explicit type declarations where possible\n"
 										+ "- use `List<T>` instead of `Array<T>`\n"
 										+ "- use collection literals such as `List.of()`, `Set.of()`, and `Map.of()` when appropriate")
@@ -89,15 +93,15 @@ public abstract class PromptStore {
 
 		@Override
 		Sub get(Type type) {
-			return type == Type.PREFACE ? prefaces : templates;
+			return type.prefaceTemplate(prefaces, templates);
 		}
 	}
 
 	public static class Sub {
 		private final TreeMap<String, String> values = new TreeMap<>();
 
-		public Collection<String> list() {
-			return values.keySet();
+		public List<String> list() {
+			return List.copyOf(values.keySet());
 		}
 
 		public String get(String key) {

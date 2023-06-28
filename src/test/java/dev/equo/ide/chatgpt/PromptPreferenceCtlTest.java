@@ -34,7 +34,7 @@ public class PromptPreferenceCtlTest {
 				20,
 				cmp -> {
 					Layouts.setFill(cmp);
-					new PromptPreferencePage.Ctl(cmp);
+					new PromptPreferencePage.Ctl(cmp, new PromptStore.Defaults());
 				});
 	}
 }

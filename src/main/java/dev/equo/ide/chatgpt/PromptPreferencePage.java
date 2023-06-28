@@ -24,6 +24,10 @@ package dev.equo.ide.chatgpt;
 import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
 import com.diffplug.common.swt.SiliconFix;
+import com.diffplug.common.swt.SwtExec;
+import io.reactivex.subjects.BehaviorSubject;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -39,14 +43,19 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class PromptPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 	@Override
 	protected Control createContents(Composite parent) {
-		return new Ctl(parent).getRootControl();
+		return new Ctl(parent, PromptStore.get()).getRootControl();
 	}
 
 	@Override
 	public void init(IWorkbench workbench) {}
 
 	public static class Ctl extends ControlWrapper.AroundControl<SashForm> {
-		public Ctl(Composite parent) {
+		private ToolItem prefacesItem, templatesItem;
+		private BehaviorSubject<PromptStore.Type> activeType =
+				BehaviorSubject.createDefault(PromptStore.Type.PREFACE);
+		private Map<PromptStore.Type, Integer> selection = new HashMap<>();
+
+		public Ctl(Composite parent, PromptStore store) {
 			super(new SashForm(parent, SWT.HORIZONTAL));
 			var left = new Composite(wrapped, SWT.NONE);
 			Layouts.setGrid(left).margin(0).spacing(0);
@@ -54,18 +63,15 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			var toolbarList = new ToolBar(left, SWT.FLAT);
 			Layouts.setGridData(toolbarList).grabHorizontal();
 
-			var prefacesItem = new ToolItem(toolbarList, SWT.RADIO);
+			prefacesItem = new ToolItem(toolbarList, SWT.RADIO);
 			prefacesItem.setText("Prefaces");
 			prefacesItem.setSelection(true);
-			var templatesItem = new ToolItem(toolbarList, SWT.RADIO);
+			templatesItem = new ToolItem(toolbarList, SWT.RADIO);
 			templatesItem.setText("Templates");
 
 			var templates = new List(left, SWT.NONE);
 			SiliconFix.fix(templates);
 			Layouts.setGridData(templates).grabAll();
-			templates.add("Freeform");
-			templates.add("Java expert");
-			templates.add("Java beginner");
 
 			var right = new Composite(wrapped, SWT.NONE);
 			Layouts.setGrid(right).numColumns(2).margin(0).spacing(0);
@@ -85,6 +91,40 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			text.forceFocus();
 
 			wrapped.setWeights(new int[] {1, 2});
+
+			var guarded = SwtExec.immediate().guardOn(this);
+			for (var type : PromptStore.Type.values()) {
+				selection.put(type, 0);
+				var item = type.prefaceTemplate(prefacesItem, templatesItem);
+				final PromptStore.Type finalType = type;
+				item.addListener(
+						SWT.Selection,
+						e -> {
+							activeType.onNext(finalType);
+						});
+			}
+			guarded.subscribe(
+					activeType,
+					type -> {
+						type.prefaceTemplate(prefacesItem, templatesItem).setSelection(true);
+						type.prefaceTemplate(templatesItem, prefacesItem).setSelection(false);
+						templates.removeAll();
+						var keys = store.get(type).list();
+						keys.forEach(templates::add);
+						var selectionIdx = selection.get(type);
+						templates.setSelection(selectionIdx);
+						var value = store.get(type).get(keys.get(selectionIdx));
+						text.setText(value);
+					});
+			templates.addListener(
+					SWT.Selection,
+					e -> {
+						int idx = templates.getSelectionIndex();
+						selection.put(activeType.getValue(), idx);
+						var key = templates.getItems()[idx];
+						var value = store.get(activeType.getValue()).get(key);
+						text.setText(value);
+					});
 		}
 	}
 }
