@@ -35,8 +35,8 @@ import org.eclipse.swt.widgets.Text;
 public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 	private final Combo prefaceCombo, templateCombo;
 	private final Text templateTxt;
-	private final DragFileCtl dragFileCtl;
-	Link switchToBrowser;
+	final DragFileCtl dragFileCtl;
+	final Link switchToBrowser;
 
 	public PromptCtl(Composite parent) {
 		super(new Composite(parent, SWT.NONE));

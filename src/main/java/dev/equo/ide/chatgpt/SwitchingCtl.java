@@ -26,6 +26,9 @@ import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
 import com.diffplug.common.swt.SwtExec;
 import com.diffplug.common.swt.SwtMisc;
+import com.diffplug.common.swt.dnd.DndOp;
+import com.diffplug.common.swt.dnd.StructuredDrop;
+import java.util.Optional;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -53,6 +56,7 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 	}
 
 	static class GptWrapperCtl extends ControlWrapper.AroundControl<Composite> {
+		final StructuredDrop drop = new StructuredDrop();
 		final ChatGptCtl ctl;
 		final Button switchTemplates;
 		SwitchingCtl parent;
@@ -94,6 +98,19 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 							parent.prompt.bringToTop();
 						}
 					});
+
+			drop.addFile(
+					StructuredDrop.handler(
+							DndOp.COPY,
+							files -> {
+								if (!files.isEmpty()) {
+									parent.prompt.getHandle().dragFileCtl.file.onNext(Optional.of(files.get(0)));
+									parent.prompt.bringToTop();
+								}
+							}));
+			drop.applyTo(ctl.getRootControl());
+			drop.applyTo(bottomPanel);
+			drop.applyTo(switchTemplates);
 		}
 
 		private static final String NEW_QUESTION = "New question";

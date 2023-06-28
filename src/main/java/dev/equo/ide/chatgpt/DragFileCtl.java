@@ -42,8 +42,7 @@ class DragFileCtl extends ControlWrapper.AroundControl<Composite> {
 	private final Label path;
 	private final ToolItem close;
 
-	private final BehaviorSubject<Optional<File>> file =
-			BehaviorSubject.createDefault(Optional.empty());
+	final BehaviorSubject<Optional<File>> file = BehaviorSubject.createDefault(Optional.empty());
 
 	public DragFileCtl(Composite parent) {
 		super(new Composite(parent, SWT.BORDER));
