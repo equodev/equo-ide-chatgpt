@@ -24,6 +24,7 @@ package dev.equo.ide.chatgpt;
 import com.diffplug.common.swt.CoatMux;
 import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
+import com.diffplug.common.swt.SwtExec;
 import com.diffplug.common.swt.SwtMisc;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -32,20 +33,14 @@ import org.eclipse.swt.widgets.Composite;
 public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 
 	private final CoatMux.Layer<GptWrapperCtl> gpt;
-	private final CoatMux.Layer<PromptCtl> prompt;
+	final CoatMux.Layer<PromptCtl> prompt;
 
 	public SwitchingCtl(Composite parent) {
 		super(new CoatMux(parent, SWT.NONE));
 		gpt = wrapped.addWrapper(GptWrapperCtl::new);
 		prompt = wrapped.addWrapper(PromptCtl::new);
 
-		gpt.getHandle()
-				.switchTemplates
-				.addListener(
-						SWT.Selection,
-						e -> {
-							prompt.bringToTop();
-						});
+		gpt.getHandle().parent = this;
 		prompt
 				.getHandle()
 				.switchToBrowser
@@ -54,15 +49,16 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 						e -> {
 							gpt.bringToTop();
 						});
-		prompt.bringToTop();
+		gpt.bringToTop();
 	}
 
 	static class GptWrapperCtl extends ControlWrapper.AroundControl<Composite> {
 		final ChatGptCtl ctl;
 		final Button switchTemplates;
+		SwitchingCtl parent;
 
-		public GptWrapperCtl(Composite parent) {
-			super(new Composite(parent, SWT.NONE));
+		public GptWrapperCtl(Composite parentCmp) {
+			super(new Composite(parentCmp, SWT.NONE));
 			Layouts.setGrid(wrapped).margin(0);
 
 			ctl = new ChatGptCtl(wrapped);
@@ -74,8 +70,33 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 			Layouts.newGridPlaceholder(bottomPanel).grabHorizontal();
 
 			switchTemplates = new Button(bottomPanel, SWT.PUSH | SWT.FLAT);
-			switchTemplates.setText("New question");
 			Layouts.setGridData(switchTemplates).widthHint(SwtMisc.defaultButtonWidth());
+			switchTemplates.setText(NEW_QUESTION);
+
+			SwtExec.async()
+					.guardOn(ctl)
+					.subscribe(
+							ctl.isReady(),
+							isReady -> {
+								if (isReady) {
+									switchTemplates.setText(NEW_QUESTION);
+									parent.prompt.bringToTop();
+								} else {
+									switchTemplates.setText(RESET_LOGIN);
+								}
+							});
+			switchTemplates.addListener(
+					SWT.Selection,
+					e -> {
+						if (switchTemplates.getText().equals(RESET_LOGIN)) {
+							ctl.tryLogin();
+						} else {
+							parent.prompt.bringToTop();
+						}
+					});
 		}
+
+		private static final String NEW_QUESTION = "New question";
+		private static final String RESET_LOGIN = "Reset login";
 	}
 }
