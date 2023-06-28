@@ -50,9 +50,9 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		prefaceCombo.select(0);
 		Layouts.setGridData(prefaceCombo).grabHorizontal();
 
-		var promptLbl = new Label(wrapped, SWT.NONE);
-		promptLbl.setText("Template");
-		Layouts.setGridData(promptLbl).verticalIndent(Layouts.defaultMargin());
+		var templateLbl = new Label(wrapped, SWT.NONE);
+		templateLbl.setText("Template");
+		Layouts.setGridData(templateLbl).verticalIndent(Layouts.defaultMargin());
 		templateCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
 		templateCombo.add("Freeform");
 		templateCombo.select(0);
@@ -78,5 +78,15 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 				.horizontalAlignment(SWT.RIGHT)
 				.verticalIndent(Layouts.defaultMargin())
 				.widthHint(SwtMisc.defaultButtonWidth());
+
+		dragFileCtl.applyDropTo(
+				prefaceLbl,
+				prefaceCombo,
+				templateLbl,
+				templateCombo,
+				templateTxt,
+				askBar,
+				switchToBrowser,
+				askBtn);
 	}
 }
