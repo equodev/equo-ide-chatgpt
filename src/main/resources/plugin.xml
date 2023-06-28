@@ -17,4 +17,12 @@
                 name="ChatGPT">
         </category>
     </extension>
+    <extension
+        point="org.eclipse.ui.preferencePages">
+        <page
+                class="dev.equo.ide.chatgpt.PromptPreferencePage"
+                id="dev.equo.ide.chatgpt.preferences.prompts"
+                name="ChatGPT Prompts">
+        </page>
+    </extension>
 </plugin>

@@ -21,4 +21,48 @@
  *******************************************************************************/
 package dev.equo.ide.chatgpt;
 
-public class PromptStore {}
+import com.diffplug.common.base.Errors;
+import java.util.Arrays;
+import java.util.List;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.osgi.service.prefs.Preferences;
+
+public class PromptStore {
+	static PromptStore get() {
+		return new PromptStore(InstanceScope.INSTANCE.getNode("dev.equo.ide.chatgpt"));
+	}
+
+	private final Preferences prefaces, templates;
+
+	PromptStore(IEclipsePreferences preferences) {
+		this.prefaces = preferences.node("prefaces");
+		this.templates = preferences.node("templates");
+	}
+
+	public List<String> listPrefaces() {
+		return Arrays.asList(Errors.rethrow().get(prefaces::keys));
+	}
+
+	public List<String> listTemplates() {
+		return Arrays.asList(Errors.rethrow().get(templates::keys));
+	}
+
+	public static String TEMPLATE_FREEFORM = "Freeform";
+
+	public void removePreface(String key) {
+		prefaces.remove(key);
+	}
+
+	public void removeTemplate(String key) {
+		templates.remove(key);
+	}
+
+	public void putPreface(String key, String value) {
+		prefaces.put(key, value);
+	}
+
+	public void putTemplate(String key, String value) {
+		templates.put(key, value);
+	}
+}
