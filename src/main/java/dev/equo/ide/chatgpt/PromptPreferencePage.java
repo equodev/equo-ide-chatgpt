@@ -22,15 +22,17 @@
 package dev.equo.ide.chatgpt;
 
 import com.diffplug.common.swt.ControlWrapper;
+import com.diffplug.common.swt.Layouts;
+import com.diffplug.common.swt.SiliconFix;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -46,26 +48,43 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 	public static class Ctl extends ControlWrapper.AroundControl<SashForm> {
 		public Ctl(Composite parent) {
 			super(new SashForm(parent, SWT.HORIZONTAL));
-			var tabs = new TabFolder(wrapped, SWT.BORDER);
-			var prefacesTab = new TabItem(tabs, SWT.NONE);
-			prefacesTab.setText("Prefaces");
+			var left = new Composite(wrapped, SWT.NONE);
+			Layouts.setGrid(left).margin(0).spacing(0);
 
-			var prefaces = new List(tabs, SWT.NONE);
-			prefaces.add("(None)");
-			prefaces.add("Java expert");
-			prefacesTab.setControl(prefaces);
+			var toolbarList = new ToolBar(left, SWT.FLAT);
+			Layouts.setGridData(toolbarList).grabHorizontal();
 
-			var templatesTab = new TabItem(tabs, SWT.NONE);
-			templatesTab.setText("Templates");
+			var prefacesItem = new ToolItem(toolbarList, SWT.RADIO);
+			prefacesItem.setText("Prefaces");
+			prefacesItem.setSelection(true);
+			var templatesItem = new ToolItem(toolbarList, SWT.RADIO);
+			templatesItem.setText("Templates");
 
-			var templates = new List(tabs, SWT.NONE);
+			var templates = new List(left, SWT.NONE);
+			SiliconFix.fix(templates);
+			Layouts.setGridData(templates).grabAll();
 			templates.add("Freeform");
 			templates.add("Java expert");
 			templates.add("Java beginner");
-			templatesTab.setControl(templates);
 
-			var text = new Text(wrapped, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+			var right = new Composite(wrapped, SWT.NONE);
+			Layouts.setGrid(right).numColumns(2).margin(0).spacing(0);
+
+			Layouts.newGridPlaceholder(right).grabHorizontal();
+			var toolbarItems = new ToolBar(right, SWT.FLAT);
+			var add = new ToolItem(toolbarItems, SWT.PUSH);
+			add.setText("Copy");
+			var minus = new ToolItem(toolbarItems, SWT.PUSH);
+			minus.setText("Delete");
+			var rename = new ToolItem(toolbarItems, SWT.PUSH);
+			rename.setText("Rename");
+
+			var text = new Text(right, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+			Layouts.setGridData(text).horizontalSpan(2).grabAll();
 			text.setText("Lorem ipsum");
+			text.forceFocus();
+
+			wrapped.setWeights(new int[] {1, 2});
 		}
 	}
 }
