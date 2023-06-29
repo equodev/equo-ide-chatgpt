@@ -22,7 +22,13 @@
 package dev.equo.ide.chatgpt;
 
 import com.diffplug.common.base.Errors;
+import com.diffplug.common.base.Unhandled;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeMap;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.Preferences;
@@ -38,10 +44,81 @@ public abstract class PromptStore {
 	}
 
 	static PromptStore get() {
-		return null;
+		return new Defaults();
 	}
 
 	abstract Sub get(Type type);
+
+	private int selectionPreface = 0;
+	private int selectionTemplate = 0;
+
+	public int getSelection(Type type) {
+		return type.prefaceTemplate(selectionPreface, selectionTemplate);
+	}
+
+	public void setSelection(Type type, int selection) {
+		switch (type) {
+			case PREFACE:
+				this.selectionPreface = selection;
+				break;
+			case TEMPLATE:
+				this.selectionTemplate = selection;
+				break;
+			default:
+				throw Unhandled.enumException(type);
+		}
+	}
+
+	public String getCurrentPrompt(Optional<File> file) {
+		var keyPreface = get(Type.PREFACE).list().get(selectionPreface);
+		var preface = get(Type.PREFACE).get(keyPreface);
+
+		var keyTemplate = get(Type.TEMPLATE).list().get(selectionTemplate);
+		var template = get(Type.TEMPLATE).get(keyTemplate);
+
+		String fileContent = null;
+		if (file != null && file.isPresent()) {
+			try {
+				fileContent = new String(Files.readAllBytes(file.get().toPath()), StandardCharsets.UTF_8);
+			} catch (IOException e) {
+				throw Errors.asRuntime(e);
+			}
+		}
+
+		String prompt = (ensureEndsWithBlankline(preface) + ensureEndsWithBlankline(template)).trim();
+		if (fileContent != null) {
+			fileContent = fileContent.replace("\r", "");
+			if (!fileContent.endsWith("\n")) {
+				fileContent = fileContent + "\n";
+			}
+			prompt = prompt + "\n\n```" + gfmType(file.get().getName()) + "\n" + fileContent + "\n```\n";
+		}
+		return prompt;
+	}
+
+	private static String ensureEndsWithBlankline(String str) {
+		if (str.endsWith("\n\n")) {
+			return str;
+		} else if (str.endsWith("\n")) {
+			return str + "\n";
+		} else {
+			return str + "\n\n";
+		}
+	}
+
+	private static String gfmType(String filename) {
+		if (filename.endsWith(".java")) {
+			return "java";
+		} else {
+			var lastDot = filename.lastIndexOf('.');
+			var lastSlash = filename.replace('\\', '/').lastIndexOf('/');
+			if (lastDot > 0 && lastSlash >= 0) {
+				return filename.substring(lastSlash + 1, lastDot);
+			} else {
+				return "";
+			}
+		}
+	}
 
 	public static class BackedByEclipse extends PromptStore {
 		private final Sub prefaces, templates;
