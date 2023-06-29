@@ -25,4 +25,12 @@
                 name="ChatGPT Prompts">
         </page>
     </extension>
+    <extension point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+                targetID="org.eclipse.jdt.ui.JavaPerspective">
+            <view id="dev.equo.ide.chatgpt.views.browser"
+                  relative="org.eclipse.ui.views.ContentOutline"
+                  relationship="stack"/>
+        </perspectiveExtension>
+    </extension>
 </plugin>
