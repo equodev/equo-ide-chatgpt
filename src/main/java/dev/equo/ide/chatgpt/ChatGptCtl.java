@@ -54,7 +54,7 @@ class ChatGptCtl extends ControlWrapper.AroundControl<Browser> {
 	}
 
 	public Observable<Boolean> isReady() {
-		return isReady;
+		return isReady.distinctUntilChanged();
 	}
 
 	private static final String CHAT_URL = "https://chat.openai.com/";
