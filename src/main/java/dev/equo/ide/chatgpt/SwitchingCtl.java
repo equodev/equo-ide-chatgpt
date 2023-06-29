@@ -52,6 +52,15 @@ public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 						e -> {
 							gpt.bringToTop();
 						});
+		prompt
+				.getHandle()
+				.askBtn
+				.addListener(
+						SWT.Selection,
+						e -> {
+							gpt.bringToTop();
+							gpt.getHandle().ctl.sendPrompt(prompt.getHandle().prompt());
+						});
 		gpt.bringToTop();
 	}
 

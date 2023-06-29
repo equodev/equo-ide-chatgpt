@@ -30,6 +30,8 @@ public class PromptCtlTest {
 	public void testTab() {
 		InteractiveTest.testCoat(
 				"Should be a browser which loads the chatgpt page",
+				15,
+				30,
 				cmp -> {
 					Layouts.setFill(cmp);
 					new PromptCtl(cmp);

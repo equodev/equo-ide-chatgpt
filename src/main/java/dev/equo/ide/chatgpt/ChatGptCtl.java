@@ -67,7 +67,7 @@ class ChatGptCtl extends ControlWrapper.AroundControl<Browser> {
 								+ "return promptBox == null ? '' : promptBox.value;");
 	}
 
-	public void setPrompt(String prompt) {
+	public void sendPrompt(String prompt) {
 		wrapped.evaluate(
 				"var promptBox = document.getElementById('prompt-textarea')\n"
 						+ "if (promptBox == null) return;\n"
@@ -79,7 +79,14 @@ class ChatGptCtl extends ControlWrapper.AroundControl<Browser> {
 						+ "  bubbles: true,\n"
 						+ "  cancelable: true,\n"
 						+ "});\n"
-						+ "promptBox.dispatchEvent(event)\n");
+						+ "promptBox.dispatchEvent(event);\n"
+						+ "// now we can click the button and submit\n"
+						+ "var button = promptBox.nextElementSibling;\n"
+						+ "button.click();");
+		wrapped.evaluate(
+				"var promptBox = document.getElementById('prompt-textarea');\n"
+						+ "var button = promptBox.nextElementSibling;\n"
+						+ "button.click();");
 	}
 
 	private static String escapeForJs(String in) {

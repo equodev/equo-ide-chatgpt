@@ -37,6 +37,8 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 	private final Text templateTxt;
 	final DragFileCtl dragFileCtl;
 	final Link switchToBrowser;
+	final Button askBtn;
+	private PromptStore store = PromptStore.get();
 
 	public PromptCtl(Composite parent) {
 		super(new Composite(parent, SWT.NONE));
@@ -46,16 +48,12 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		prefaceLbl.setText("Preface");
 
 		prefaceCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
-		prefaceCombo.add("Java expert");
-		prefaceCombo.select(0);
 		Layouts.setGridData(prefaceCombo).grabHorizontal();
 
 		var templateLbl = new Label(wrapped, SWT.NONE);
 		templateLbl.setText("Template");
 		Layouts.setGridData(templateLbl).verticalIndent(Layouts.defaultMargin());
 		templateCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
-		templateCombo.add("Freeform");
-		templateCombo.select(0);
 		Layouts.setGridData(templateCombo).grabHorizontal();
 
 		templateTxt = new Text(wrapped, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
@@ -72,7 +70,7 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		switchToBrowser.setText("<a>Open browser</a>");
 		Layouts.setGridData(switchToBrowser).grabHorizontal().verticalAlignment(SWT.BOTTOM);
 
-		var askBtn = new Button(askBar, SWT.PUSH | SWT.FLAT);
+		askBtn = new Button(askBar, SWT.PUSH | SWT.FLAT);
 		askBtn.setText("Get answer");
 		Layouts.setGridData(askBtn)
 				.horizontalAlignment(SWT.RIGHT)
@@ -88,5 +86,31 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 				askBar,
 				switchToBrowser,
 				askBtn);
+
+		// bind the data model
+		for (var type : PromptStore.Type.values()) {
+			final PromptStore.Type finalType = type;
+			final PromptStore.Sub sub = store.get(finalType);
+			var combo = type.prefaceTemplate(prefaceCombo, templateCombo);
+			combo.addListener(
+					SWT.Selection,
+					e -> {
+						var idx = combo.getSelectionIndex();
+						store.setSelection(finalType, idx);
+						if (finalType == PromptStore.Type.TEMPLATE) {
+							templateTxt.setText(sub.get(sub.list().get(idx)));
+						}
+					});
+			sub.list().forEach(combo::add);
+			int selectionIdx = store.getSelection(type);
+			combo.select(selectionIdx);
+			if (type == PromptStore.Type.TEMPLATE) {
+				templateTxt.setText(sub.get(sub.list().get(selectionIdx)));
+			}
+		}
+	}
+
+	String prompt() {
+		return store.getCurrentPrompt(dragFileCtl.file.getValue());
 	}
 }
