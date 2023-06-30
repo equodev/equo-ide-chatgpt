@@ -78,12 +78,12 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 
 			Layouts.newGridPlaceholder(right).grabHorizontal();
 			var toolbarItems = new ToolBar(right, SWT.FLAT);
-			var add = new ToolItem(toolbarItems, SWT.PUSH);
-			add.setText("Copy");
-			var minus = new ToolItem(toolbarItems, SWT.PUSH);
-			minus.setText("Delete");
+			var delete = new ToolItem(toolbarItems, SWT.PUSH);
+			delete.setText("Delete");
 			var rename = new ToolItem(toolbarItems, SWT.PUSH);
 			rename.setText("Rename");
+			var copy = new ToolItem(toolbarItems, SWT.PUSH);
+			copy.setText("Copy");
 
 			var text = new Text(right, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 			Layouts.setGridData(text).horizontalSpan(2).grabAll();
