@@ -56,8 +56,10 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		templateCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
 		Layouts.setGridData(templateCombo).grabHorizontal();
 
-		templateTxt = new Text(wrapped, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		Layouts.setGridData(templateTxt).grabAll();
+		var templateContainer = new Composite(wrapped, SWT.BORDER);
+		templateTxt = new Text(templateContainer, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		Layouts.setSingleNoMargin(templateContainer);
+		Layouts.setGridData(templateContainer).grabAll();
 
 		dragFileCtl = new DragFileCtl(wrapped);
 		Layouts.setGridData(dragFileCtl).grabHorizontal().verticalIndent(Layouts.defaultMargin());

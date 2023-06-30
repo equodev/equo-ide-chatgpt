@@ -34,6 +34,10 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.Preferences;
 
 public abstract class PromptStore {
+	public static final String NONE = "(None)";
+	public static final String FREEFORM = "(Freeform)";
+	public static final String DIALOG = "(Dialog...)";
+
 	public enum Type {
 		PREFACE,
 		TEMPLATE;
@@ -151,11 +155,13 @@ public abstract class PromptStore {
 						.put(
 								"Java verbose",
 								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a detailed answer. Describe the reasoning for your answer.")
-						.put("(None)", "");
+						.put(NONE, "")
+						.put(DIALOG, "");
 
 		private final Sub templates =
 				new Sub()
-						.put("Freeform", "")
+						.put(FREEFORM, "")
+						.put(DIALOG, "")
 						.put("Test JUnit 5", "Write a test for the following class using JUnit 5.")
 						.put("Test JUnit 4", "Write a test for the following class using JUnit 4.")
 						.put(

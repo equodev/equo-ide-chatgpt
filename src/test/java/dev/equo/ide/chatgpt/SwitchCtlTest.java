@@ -30,6 +30,8 @@ public class SwitchCtlTest {
 	public void testTab() {
 		InteractiveTest.testCoat(
 				"Should be a browser which loads the chatgpt page",
+				15,
+				30,
 				cmp -> {
 					Layouts.setFill(cmp);
 					new SwitchingCtl(cmp);
