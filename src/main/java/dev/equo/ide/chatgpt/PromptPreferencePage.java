@@ -44,29 +44,30 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class PromptPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-	private static Shell dialog;
+	private static Ctl dialog;
 
-	public static void openDialog() {
+	public static void openDialog(PromptStore.Type type) {
 		if (dialog != null) {
-			dialog.open();
-			dialog.forceActive();
+			dialog.getShell().open();
+			dialog.getShell().forceActive();
 		} else {
-			dialog =
+			Shell dialogShell =
 					Shells.builder(
 									SWT.DIALOG_TRIM | SWT.RESIZE,
 									cmp -> {
 										Layouts.setFill(cmp);
-										new Ctl(cmp, PromptStore.get());
+										dialog = new Ctl(cmp, PromptStore.get());
 									})
 							.setTitle("ChatGPT Prompts")
 							.setSize(SwtMisc.defaultDialogWidth(), SwtMisc.defaultDialogWidth())
 							.openOnActive();
-			dialog.addListener(
+			dialogShell.addListener(
 					SWT.Dispose,
 					e -> {
 						dialog = null;
 					});
 		}
+		dialog.matchSelectionToView(type);
 	}
 
 	@Override
@@ -78,13 +79,17 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 	public void init(IWorkbench workbench) {}
 
 	public static class Ctl extends ControlWrapper.AroundControl<SashForm> {
+		private PromptStore store;
 		private ToolItem prefacesItem, templatesItem;
+		private List templates;
+		private Text text;
 		private BehaviorSubject<PromptStore.Type> activeType =
 				BehaviorSubject.createDefault(PromptStore.Type.PREFACE);
 		private Map<PromptStore.Type, Integer> selection = new HashMap<>();
 
 		public Ctl(Composite parent, PromptStore store) {
 			super(new SashForm(parent, SWT.HORIZONTAL));
+			this.store = store;
 			var left = new Composite(wrapped, SWT.NONE);
 			Layouts.setGrid(left).margin(0).spacing(0);
 
@@ -97,7 +102,7 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			templatesItem = new ToolItem(toolbarList, SWT.RADIO);
 			templatesItem.setText("Templates");
 
-			var templates = new List(left, SWT.NONE);
+			templates = new List(left, SWT.NONE);
 			SiliconFix.fix(templates);
 			Layouts.setGridData(templates).grabAll();
 
@@ -113,16 +118,15 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			var copy = new ToolItem(toolbarItems, SWT.PUSH);
 			copy.setText("Copy");
 
-			var text = new Text(right, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+			text = new Text(right, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 			Layouts.setGridData(text).horizontalSpan(2).grabAll();
-			text.setText("Lorem ipsum");
 			text.forceFocus();
 
 			wrapped.setWeights(new int[] {1, 2});
 
 			var guarded = SwtExec.immediate().guardOn(this);
 			for (var type : PromptStore.Type.values()) {
-				selection.put(type, 0);
+				selection.put(type, store.getSelection(type));
 				var item = type.prefaceTemplate(prefacesItem, templatesItem);
 				final PromptStore.Type finalType = type;
 				item.addListener(
@@ -148,11 +152,28 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 					SWT.Selection,
 					e -> {
 						int idx = templates.getSelectionIndex();
-						selection.put(activeType.getValue(), idx);
-						var key = templates.getItems()[idx];
-						var value = store.get(activeType.getValue()).get(key);
-						text.setText(value);
+						if (idx >= 0) {
+							selection.put(activeType.getValue(), idx);
+							var key = templates.getItems()[idx];
+							var value = store.get(activeType.getValue()).get(key);
+							text.setText(value);
+						}
 					});
+		}
+
+		void matchSelectionToView(PromptStore.Type type) {
+			activeType.onNext(type);
+			SwtExec.async()
+					.guardOn(this)
+					.execute(
+							() -> {
+								var selectionIdx = store.getSelection(type);
+								templates.setSelection(selectionIdx);
+
+								var sub = store.get(type);
+								var value = sub.get(sub.list().get(selectionIdx));
+								text.setText(value);
+							});
 		}
 	}
 }

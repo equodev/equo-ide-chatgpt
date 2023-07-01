@@ -47,8 +47,10 @@ public abstract class PromptStore {
 		}
 	}
 
+	private static final PromptStore store = new Defaults();
+
 	static PromptStore get() {
-		return new Defaults();
+		return store;
 	}
 
 	abstract Sub get(Type type);

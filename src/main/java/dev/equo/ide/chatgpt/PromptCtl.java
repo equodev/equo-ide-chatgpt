@@ -99,7 +99,7 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 					e -> {
 						var idx = combo.getSelectionIndex();
 						if (idx == sub.list().size()) {
-							PromptPreferencePage.openDialog();
+							PromptPreferencePage.openDialog(finalType);
 							combo.select(store.getSelection(finalType));
 							return;
 						}
