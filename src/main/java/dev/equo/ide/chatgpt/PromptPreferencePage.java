@@ -84,7 +84,7 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 		private Text text;
 		private PromptStore.Type activeType;
 		private String activeKey;
-		private boolean activeIsDefault;
+		private Boolean activeIsDefault;
 
 		private Map<PromptStore.Type, String> selection = new HashMap<>();
 
@@ -111,12 +111,6 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 
 			Layouts.newGridPlaceholder(right).grabHorizontal();
 			toolbar = new ToolBar(right, SWT.FLAT);
-			var delete = new ToolItem(toolbar, SWT.PUSH);
-			delete.setText("Delete");
-			var rename = new ToolItem(toolbar, SWT.PUSH);
-			rename.setText("Rename");
-			var copy = new ToolItem(toolbar, SWT.PUSH);
-			copy.setText("Copy");
 
 			text = new Text(right, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 			Layouts.setGridData(text).horizontalSpan(2).grabAll();
@@ -168,6 +162,26 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			int selectionIdx = keys.indexOf(key);
 			templates.setSelection(selectionIdx);
 			text.setText(store.get(type).get(activeKey));
+
+			boolean isDefault = store.isDefault(type, key);
+			if (activeIsDefault == null || activeIsDefault.booleanValue() != isDefault) {
+				for (var child : toolbar.getChildren()) {
+					child.dispose();
+				}
+				if (isDefault) {
+					var cantModify = new ToolItem(toolbar, SWT.PUSH);
+					cantModify.setText("Can't modify built-in");
+					cantModify.setEnabled(false);
+				} else {
+					var delete = new ToolItem(toolbar, SWT.PUSH);
+					delete.setText("Delete");
+					var rename = new ToolItem(toolbar, SWT.PUSH);
+					rename.setText("Rename");
+				}
+				var copy = new ToolItem(toolbar, SWT.PUSH);
+				copy.setText("Copy");
+				copy.addListener(SWT.Selection, e -> {});
+			}
 		}
 
 		void matchSelectionToView(PromptStore.Type type) {

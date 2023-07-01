@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -47,13 +48,15 @@ public abstract class PromptStore {
 		}
 	}
 
-	private static final PromptStore store = new Defaults();
-
 	static PromptStore get() {
 		return store;
 	}
 
 	abstract Sub get(Type type);
+
+	public boolean isDefault(Type type, String key) {
+		return type.prefaceTemplate(defaultPrefaces, defaultTemplates).containsKey(key);
+	}
 
 	private int selectionPreface = 0;
 	private int selectionTemplate = 0;
@@ -148,40 +151,33 @@ public abstract class PromptStore {
 		}
 	}
 
-	public static class Defaults extends PromptStore {
-		private final Sub prefaces =
-				new Sub()
-						.put(NONE, "")
-						.put(
-								"Java terse",
-								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a concise answer. Wherever possible, respond only in code without any explanation.")
-						.put(
-								"Java verbose",
-								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a detailed answer. Describe the reasoning for your answer.");
+	private static final Map<String, String> defaultPrefaces =
+			Map.of(
+					NONE,
+					"",
+					"Java terse",
+					"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a concise answer. Wherever possible, respond only in code without any explanation.",
+					"Java verbose",
+					"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a detailed answer. Describe the reasoning for your answer.");
 
-		private final Sub templates =
-				new Sub()
-						.put(FREEFORM, "")
-						.put("Test JUnit 5", "Write a test for the following class using JUnit 5.")
-						.put("Test JUnit 4", "Write a test for the following class using JUnit 4.")
-						.put(
-								"Modernize",
-								"Rewrite the following class using the latest syntax constructs from Java 11. Examples to modernize:\n\n"
-										+ "- use `var` instead of explicit type declarations where possible\n"
-										+ "- use `List<T>` instead of `Array<T>`\n"
-										+ "- use collection literals such as `List.of()`, `Set.of()`, and `Map.of()` when appropriate")
-						.put(
-								"Describe",
-								"Describe the functionality of the following class. Call special attention to any unusual aspects of the design if they are present.");
-
-		@Override
-		Sub get(Type type) {
-			return type.prefaceTemplate(prefaces, templates);
-		}
-	}
+	private static final Map<String, String> defaultTemplates =
+			Map.of(
+					FREEFORM,
+					"",
+					"Test JUnit 5",
+					"Write a test for the following class using JUnit 5.",
+					"Test JUnit 4",
+					"Write a test for the following class using JUnit 4.",
+					"Modernize",
+					"Rewrite the following class using the latest syntax constructs from Java 11. Examples to modernize:\n\n"
+							+ "- use `var` instead of explicit type declarations where possible\n"
+							+ "- use `List<T>` instead of `Array<T>`\n"
+							+ "- use collection literals such as `List.of()`, `Set.of()`, and `Map.of()` when appropriate",
+					"Describe",
+					"Describe the functionality of the following class. Call special attention to any unusual aspects of the design if they are present.");
 
 	public static class Sub {
-		private final TreeMap<String, String> values = new TreeMap<>();
+		final TreeMap<String, String> values = new TreeMap<>();
 
 		public List<String> list() {
 			return List.copyOf(values.keySet());
@@ -191,9 +187,24 @@ public abstract class PromptStore {
 			return values.get(key);
 		}
 
-		public Sub put(String key, String value) {
+		public void put(String key, String value) {
 			values.put(key, value);
-			return this;
 		}
 	}
+
+	private static final PromptStore store =
+			new PromptStore() {
+				private Sub preface = new Sub();
+				private Sub templates = new Sub();
+
+				{
+					preface.values.putAll(defaultPrefaces);
+					templates.values.putAll(defaultTemplates);
+				}
+
+				@Override
+				Sub get(Type type) {
+					return type.prefaceTemplate(preface, templates);
+				}
+			};
 }
