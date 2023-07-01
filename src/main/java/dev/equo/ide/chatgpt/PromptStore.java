@@ -149,19 +149,17 @@ public abstract class PromptStore {
 	public static class Defaults extends PromptStore {
 		private final Sub prefaces =
 				new Sub()
+						.put(NONE, "")
 						.put(
 								"Java terse",
 								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a concise answer. Wherever possible, respond only in code without any explanation.")
 						.put(
 								"Java verbose",
-								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a detailed answer. Describe the reasoning for your answer.")
-						.put(NONE, "")
-						.put(DIALOG, "");
+								"You are an expert Java developer. For the question below, please think carefully, work step by step, and provide a detailed answer. Describe the reasoning for your answer.");
 
 		private final Sub templates =
 				new Sub()
 						.put(FREEFORM, "")
-						.put(DIALOG, "")
 						.put("Test JUnit 5", "Write a test for the following class using JUnit 5.")
 						.put("Test JUnit 4", "Write a test for the following class using JUnit 4.")
 						.put(

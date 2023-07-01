@@ -23,8 +23,10 @@ package dev.equo.ide.chatgpt;
 
 import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
+import com.diffplug.common.swt.Shells;
 import com.diffplug.common.swt.SiliconFix;
 import com.diffplug.common.swt.SwtExec;
+import com.diffplug.common.swt.SwtMisc;
 import io.reactivex.subjects.BehaviorSubject;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +36,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -41,6 +44,31 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class PromptPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+	private static Shell dialog;
+
+	public static void openDialog() {
+		if (dialog != null) {
+			dialog.open();
+			dialog.forceActive();
+		} else {
+			dialog =
+					Shells.builder(
+									SWT.DIALOG_TRIM | SWT.RESIZE,
+									cmp -> {
+										Layouts.setFill(cmp);
+										new Ctl(cmp, PromptStore.get());
+									})
+							.setTitle("ChatGPT Prompts")
+							.setSize(SwtMisc.defaultDialogWidth(), SwtMisc.defaultDialogWidth())
+							.openOnActive();
+			dialog.addListener(
+					SWT.Dispose,
+					e -> {
+						dialog = null;
+					});
+		}
+	}
+
 	@Override
 	protected Control createContents(Composite parent) {
 		return new Ctl(parent, PromptStore.get()).getRootControl();

@@ -98,12 +98,18 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 					SWT.Selection,
 					e -> {
 						var idx = combo.getSelectionIndex();
+						if (idx == sub.list().size()) {
+							PromptPreferencePage.openDialog();
+							combo.select(store.getSelection(finalType));
+							return;
+						}
 						store.setSelection(finalType, idx);
 						if (finalType == PromptStore.Type.TEMPLATE) {
 							templateTxt.setText(sub.get(sub.list().get(idx)));
 						}
 					});
 			sub.list().forEach(combo::add);
+			combo.add(PromptStore.DIALOG);
 			int selectionIdx = store.getSelection(type);
 			combo.select(selectionIdx);
 			if (type == PromptStore.Type.TEMPLATE) {
