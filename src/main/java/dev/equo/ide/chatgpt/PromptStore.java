@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.service.prefs.Preferences;
 
@@ -190,7 +191,34 @@ public abstract class PromptStore {
 		public void put(String key, String value) {
 			values.put(key, value);
 		}
+
+		String newKey(String keySimilarTo, String content) {
+			if (!values.containsKey(keySimilarTo)) {
+				values.put(keySimilarTo, content);
+				return keySimilarTo;
+			}
+			String keyPrefix;
+			int startIdx;
+			var matcher = V_MATCHER.matcher(keySimilarTo);
+			if (matcher.matches()) {
+				keyPrefix = matcher.group(1) + " v";
+				startIdx = Integer.parseInt(matcher.group(2)) + 1;
+			} else {
+				keyPrefix = keySimilarTo + " v";
+				startIdx = 2;
+			}
+			for (int i = startIdx; i <= 99; ++i) {
+				String candidate = keyPrefix + i;
+				if (!values.containsKey(candidate)) {
+					values.put(candidate, content);
+					return candidate;
+				}
+			}
+			throw new IllegalStateException("Too many versions of " + keyPrefix);
+		}
 	}
+
+	private static final Pattern V_MATCHER = Pattern.compile("(.*) v(\\d+)$");
 
 	private static final PromptStore store =
 			new PromptStore() {

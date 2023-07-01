@@ -165,7 +165,8 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 
 			boolean isDefault = store.isDefault(type, key);
 			if (activeIsDefault == null || activeIsDefault.booleanValue() != isDefault) {
-				for (var child : toolbar.getChildren()) {
+				activeIsDefault = isDefault;
+				for (var child : toolbar.getItems()) {
 					child.dispose();
 				}
 				if (isDefault) {
@@ -180,7 +181,12 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 				}
 				var copy = new ToolItem(toolbar, SWT.PUSH);
 				copy.setText("Copy");
-				copy.addListener(SWT.Selection, e -> {});
+				copy.addListener(
+						SWT.Selection,
+						e -> {
+							String newKey = store.get(activeType).newKey(activeKey, text.getText());
+							setActive(activeType, newKey);
+						});
 			}
 		}
 
