@@ -25,9 +25,7 @@ import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
 import com.diffplug.common.swt.Shells;
 import com.diffplug.common.swt.SiliconFix;
-import com.diffplug.common.swt.SwtExec;
 import com.diffplug.common.swt.SwtMisc;
-import io.reactivex.subjects.BehaviorSubject;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.jface.preference.PreferencePage;
@@ -81,11 +79,14 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 	public static class Ctl extends ControlWrapper.AroundControl<SashForm> {
 		private PromptStore store;
 		private ToolItem prefacesItem, templatesItem;
+		private ToolBar toolbar;
 		private List templates;
 		private Text text;
-		private BehaviorSubject<PromptStore.Type> activeType =
-				BehaviorSubject.createDefault(PromptStore.Type.PREFACE);
-		private Map<PromptStore.Type, Integer> selection = new HashMap<>();
+		private PromptStore.Type activeType;
+		private String activeKey;
+		private boolean activeIsDefault;
+
+		private Map<PromptStore.Type, String> selection = new HashMap<>();
 
 		public Ctl(Composite parent, PromptStore store) {
 			super(new SashForm(parent, SWT.HORIZONTAL));
@@ -93,13 +94,12 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			var left = new Composite(wrapped, SWT.NONE);
 			Layouts.setGrid(left).margin(0).spacing(0);
 
-			var toolbarList = new ToolBar(left, SWT.FLAT);
-			Layouts.setGridData(toolbarList).grabHorizontal();
+			ToolBar kindToolbar = new ToolBar(left, SWT.FLAT);
+			Layouts.setGridData(kindToolbar).grabHorizontal();
 
-			prefacesItem = new ToolItem(toolbarList, SWT.RADIO);
+			prefacesItem = new ToolItem(kindToolbar, SWT.RADIO);
 			prefacesItem.setText("Prefaces");
-			prefacesItem.setSelection(true);
-			templatesItem = new ToolItem(toolbarList, SWT.RADIO);
+			templatesItem = new ToolItem(kindToolbar, SWT.RADIO);
 			templatesItem.setText("Templates");
 
 			templates = new List(left, SWT.NONE);
@@ -110,12 +110,12 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			Layouts.setGrid(right).numColumns(2).margin(0).spacing(0);
 
 			Layouts.newGridPlaceholder(right).grabHorizontal();
-			var toolbarItems = new ToolBar(right, SWT.FLAT);
-			var delete = new ToolItem(toolbarItems, SWT.PUSH);
+			toolbar = new ToolBar(right, SWT.FLAT);
+			var delete = new ToolItem(toolbar, SWT.PUSH);
 			delete.setText("Delete");
-			var rename = new ToolItem(toolbarItems, SWT.PUSH);
+			var rename = new ToolItem(toolbar, SWT.PUSH);
 			rename.setText("Rename");
-			var copy = new ToolItem(toolbarItems, SWT.PUSH);
+			var copy = new ToolItem(toolbar, SWT.PUSH);
 			copy.setText("Copy");
 
 			text = new Text(right, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
@@ -124,56 +124,55 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 
 			wrapped.setWeights(new int[] {1, 2});
 
-			var guarded = SwtExec.immediate().guardOn(this);
 			for (var type : PromptStore.Type.values()) {
-				selection.put(type, store.getSelection(type));
+				var sub = store.get(type);
+				selection.put(type, sub.list().get(store.getSelection(type)));
 				var item = type.prefaceTemplate(prefacesItem, templatesItem);
 				final PromptStore.Type finalType = type;
 				item.addListener(
 						SWT.Selection,
 						e -> {
-							activeType.onNext(finalType);
+							setActive(finalType, selection.get(finalType));
 						});
 			}
-			guarded.subscribe(
-					activeType,
-					type -> {
-						type.prefaceTemplate(prefacesItem, templatesItem).setSelection(true);
-						type.prefaceTemplate(templatesItem, prefacesItem).setSelection(false);
-						templates.removeAll();
-						var keys = store.get(type).list();
-						keys.forEach(templates::add);
-						var selectionIdx = selection.get(type);
-						templates.setSelection(selectionIdx);
-						var value = store.get(type).get(keys.get(selectionIdx));
-						text.setText(value);
-					});
 			templates.addListener(
 					SWT.Selection,
 					e -> {
-						int idx = templates.getSelectionIndex();
-						if (idx >= 0) {
-							selection.put(activeType.getValue(), idx);
-							var key = templates.getItems()[idx];
-							var value = store.get(activeType.getValue()).get(key);
-							text.setText(value);
+						String[] selected = templates.getSelection();
+						if (selected.length == 1) {
+							setActive(activeType, selected[0]);
 						}
 					});
+			setActive(PromptStore.Type.PREFACE, selection.get(PromptStore.Type.PREFACE));
+		}
+
+		private void storeCurrent() {
+			var sub = store.get(activeType);
+			sub.put(activeKey, text.getText());
+			selection.put(activeType, sub.list().get(templates.getSelectionIndex()));
+		}
+
+		private void setActive(PromptStore.Type type, String key) {
+			// store the last value
+			if (activeType != null) {
+				storeCurrent();
+			}
+			activeType = type;
+			type.prefaceTemplate(prefacesItem, templatesItem).setSelection(true);
+			type.prefaceTemplate(templatesItem, prefacesItem).setSelection(false);
+			templates.removeAll();
+			var keys = store.get(type).list();
+			keys.forEach(templates::add);
+
+			activeKey = key;
+			int selectionIdx = keys.indexOf(key);
+			templates.setSelection(selectionIdx);
+			text.setText(store.get(type).get(activeKey));
 		}
 
 		void matchSelectionToView(PromptStore.Type type) {
-			activeType.onNext(type);
-			SwtExec.async()
-					.guardOn(this)
-					.execute(
-							() -> {
-								var selectionIdx = store.getSelection(type);
-								templates.setSelection(selectionIdx);
-
-								var sub = store.get(type);
-								var value = sub.get(sub.list().get(selectionIdx));
-								text.setText(value);
-							});
+			var selectionIdx = store.getSelection(type);
+			setActive(type, store.get(type).list().get(selectionIdx));
 		}
 	}
 }
