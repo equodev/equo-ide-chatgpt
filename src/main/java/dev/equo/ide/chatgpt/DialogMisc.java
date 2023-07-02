@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 class DialogMisc {
 	/** Opens a dialog and waits for an answer to the given question. */
@@ -76,5 +77,84 @@ class DialogMisc {
 				.setSize(SwtMisc.defaultDialogWidth(), SWT.DEFAULT)
 				.openOnBlocking(parent);
 		return clickedYes.get();
+	}
+
+	public static void blockForError(String title, String message, Shell parent) {
+		Shells.builder(
+						SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL,
+						cmp -> {
+							Layouts.setGrid(cmp).numColumns(2);
+
+							var icon = new Label(cmp, SWT.NONE);
+							icon.setImage(SwtMisc.getSystemIcon(SWT.ICON_ERROR));
+
+							var label = new Label(cmp, SWT.WRAP);
+							label.setText(message);
+							Layouts.setGridData(label).grabHorizontal();
+
+							Layouts.newGridRow(
+									cmp,
+									buttons -> {
+										Layouts.newGridPlaceholder(buttons).grabHorizontal();
+										var ok = new Button(buttons, SWT.PUSH);
+										ok.setText("OK");
+										ok.addListener(
+												SWT.Selection,
+												e -> {
+													cmp.getShell().dispose();
+												});
+										Layouts.setGridData(ok).widthHint(SwtMisc.defaultButtonWidth());
+									});
+						})
+				.setTitle(title)
+				.setSize(SwtMisc.defaultDialogWidth(), SWT.DEFAULT)
+				.openOnBlocking(parent);
+	}
+
+	public static String blockForRename(String activeKey, Shell parent) {
+		Box.Nullable<String> newName = Box.Nullable.ofNull();
+		Shells.builder(
+						SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL,
+						cmp -> {
+							Layouts.setGrid(cmp);
+
+							var label = new Label(cmp, SWT.WRAP);
+							label.setText("Rename " + activeKey + " to:");
+							Layouts.setGridData(label).grabHorizontal();
+
+							var text = new Text(cmp, SWT.BORDER | SWT.SINGLE);
+							text.setText(activeKey);
+							Layouts.setGridData(text).grabHorizontal();
+
+							Layouts.newGridRow(
+									cmp,
+									buttons -> {
+										Layouts.newGridPlaceholder(buttons).grabHorizontal();
+										var cancel = new Button(buttons, SWT.PUSH);
+										cancel.setText("Cancel");
+										cancel.addListener(
+												SWT.Selection,
+												e -> {
+													cmp.getShell().dispose();
+												});
+										var rename = new Button(buttons, SWT.PUSH);
+										rename.setText("Rename");
+										rename.addListener(
+												SWT.Selection,
+												e -> {
+													newName.set(text.getText());
+													cmp.getShell().dispose();
+												});
+										rename.setFocus();
+										rename.forceFocus();
+
+										Layouts.setGridData(cancel).widthHint(SwtMisc.defaultButtonWidth());
+										Layouts.setGridData(rename).widthHint(SwtMisc.defaultButtonWidth());
+									});
+						})
+				.setTitle("Rename " + activeKey)
+				.setSize(SwtMisc.defaultDialogWidth(), SWT.DEFAULT)
+				.openOnBlocking(parent);
+		return newName.get();
 	}
 }

@@ -27,6 +27,7 @@ import com.diffplug.common.swt.Shells;
 import com.diffplug.common.swt.SiliconFix;
 import com.diffplug.common.swt.SwtMisc;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -192,6 +193,11 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 							});
 					var rename = new ToolItem(toolbar, SWT.PUSH);
 					rename.setText("Rename");
+					rename.addListener(
+							SWT.Selection,
+							e -> {
+								rename();
+							});
 				}
 				var copy = new ToolItem(toolbar, SWT.PUSH);
 				copy.setText("Copy");
@@ -219,6 +225,28 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 				}
 				setActive(activeType, toSelect);
 			}
+		}
+
+		private void rename() {
+			String newName = DialogMisc.blockForRename(activeKey, getShell());
+			if (newName == null) {
+				return;
+			}
+			var sub = store.get(activeType);
+			var content = sub.get(activeKey);
+			var existing = sub.get(newName);
+			if (existing != null && !existing.equals(content)) {
+				DialogMisc.blockForError(
+						"Duplicate name " + newName,
+						"There is already a "
+								+ activeType.name().toLowerCase(Locale.ROOT)
+								+ " named "
+								+ newName,
+						getShell());
+			}
+			sub.remove(activeKey);
+			sub.put(newName, content);
+			setActive(activeType, newName);
 		}
 
 		void matchSelectionToView(PromptStore.Type type) {
