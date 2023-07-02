@@ -21,7 +21,6 @@
  *******************************************************************************/
 package dev.equo.ide.chatgpt;
 
-import com.diffplug.common.base.Errors;
 import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
 import com.diffplug.common.swt.Shells;
@@ -150,7 +149,7 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			wrapped.addListener(
 					SWT.Dispose,
 					e -> {
-						Errors.dialog().run(() -> PromptStore.get().save());
+						PromptStore.get().save();
 					});
 		}
 

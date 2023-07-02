@@ -129,6 +129,7 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, templateTxt.getText());
 					}
 				});
+		wrapped.addListener(SWT.Dispose, e -> store.save());
 	}
 
 	private void refreshData() {

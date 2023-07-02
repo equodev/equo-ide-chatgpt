@@ -53,7 +53,7 @@ public abstract class PromptStore {
 
 	abstract Sub get(Type type);
 
-	abstract void save() throws Exception;
+	abstract void save();
 
 	public boolean isDefault(Type type, String key) {
 		return type.prefaceTemplate(defaultPrefaces, defaultTemplates).containsKey(key);
@@ -219,6 +219,8 @@ public abstract class PromptStore {
 			this.rootPreferences = preferences;
 			prefaces = parse(preferences.node("prefaces"));
 			templates = parse(preferences.node("templates"));
+			setSelection(Type.PREFACE, preferences.getInt("prefaces-selection", 0));
+			setSelection(Type.TEMPLATE, preferences.getInt("templates-selection", 0));
 			prefaces.values.putAll(defaultPrefaces);
 			templates.values.putAll(defaultTemplates);
 		}
@@ -232,9 +234,16 @@ public abstract class PromptStore {
 		}
 
 		@Override
-		void save() throws BackingStoreException {
-			save(rootPreferences.node("prefaces"), prefaces, defaultPrefaces);
-			save(rootPreferences.node("templates"), templates, defaultTemplates);
+		void save() {
+			try {
+				save(rootPreferences.node("prefaces"), prefaces, defaultPrefaces);
+				save(rootPreferences.node("templates"), templates, defaultTemplates);
+				rootPreferences.putInt("prefaces-selection", getSelection(Type.PREFACE));
+				rootPreferences.putInt("templates-selection", getSelection(Type.TEMPLATE));
+				rootPreferences.flush();
+			} catch (Exception e) {
+				Errors.dialog().accept(e);
+			}
 		}
 
 		private void save(Preferences preferences, Sub sub, Map<String, String> defaults)
@@ -249,7 +258,6 @@ public abstract class PromptStore {
 					preferences.put(entry.getKey(), entry.getValue());
 				}
 			}
-			preferences.flush();
 		}
 
 		@Override
