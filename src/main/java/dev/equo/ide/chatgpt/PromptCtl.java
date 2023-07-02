@@ -24,6 +24,7 @@ package dev.equo.ide.chatgpt;
 import com.diffplug.common.swt.ControlWrapper;
 import com.diffplug.common.swt.Layouts;
 import com.diffplug.common.swt.SwtMisc;
+import java.util.Arrays;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -108,8 +109,36 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 							templateTxt.setText(sub.get(sub.list().get(idx)));
 						}
 					});
+			refreshData();
+		}
+		templateTxt.addListener(
+				SWT.Modify,
+				e -> {
+					String key = templateCombo.getItem(templateCombo.getSelectionIndex());
+					if (!key.equals(PromptStore.FREEFORM)) {
+						String storeContent = store.get(PromptStore.Type.TEMPLATE).get(key);
+						String uiContent = templateTxt.getText();
+						if (storeContent.equals(uiContent)) {
+							return;
+						}
+						int freeformIdx = Arrays.asList(templateCombo.getItems()).indexOf(PromptStore.FREEFORM);
+						store.setSelection(PromptStore.Type.TEMPLATE, freeformIdx);
+						templateCombo.select(freeformIdx);
+						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, templateTxt.getText());
+					} else {
+						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, templateTxt.getText());
+					}
+				});
+	}
+
+	private void refreshData() {
+		for (var type : PromptStore.Type.values()) {
+			var combo = type.prefaceTemplate(prefaceCombo, templateCombo);
+			combo.removeAll();
+			var sub = store.get(type);
 			sub.list().forEach(combo::add);
 			combo.add(PromptStore.DIALOG);
+
 			int selectionIdx = store.getSelection(type);
 			combo.select(selectionIdx);
 			if (type == PromptStore.Type.TEMPLATE) {
