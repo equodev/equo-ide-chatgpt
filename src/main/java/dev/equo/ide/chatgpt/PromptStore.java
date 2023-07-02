@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
 public abstract class PromptStore {
@@ -49,11 +51,9 @@ public abstract class PromptStore {
 		}
 	}
 
-	static PromptStore get() {
-		return store;
-	}
-
 	abstract Sub get(Type type);
+
+	abstract void save() throws Exception;
 
 	public boolean isDefault(Type type, String key) {
 		return type.prefaceTemplate(defaultPrefaces, defaultTemplates).containsKey(key);
@@ -130,28 +130,6 @@ public abstract class PromptStore {
 		}
 	}
 
-	public static class BackedByEclipse extends PromptStore {
-		private final Sub prefaces, templates;
-
-		BackedByEclipse(IEclipsePreferences preferences) {
-			prefaces = parse(preferences.node("prefaces"));
-			templates = parse(preferences.node("templates"));
-		}
-
-		private Sub parse(Preferences preferences) {
-			var sub = new Sub();
-			for (String key : Errors.rethrow().get(preferences::keys)) {
-				sub.put(key, preferences.get(key, null));
-			}
-			return sub;
-		}
-
-		@Override
-		Sub get(Type type) {
-			return type.prefaceTemplate(prefaces, templates);
-		}
-	}
-
 	private static final Map<String, String> defaultPrefaces =
 			Map.of(
 					NONE,
@@ -224,19 +202,59 @@ public abstract class PromptStore {
 
 	private static final Pattern V_MATCHER = Pattern.compile("(.*) v(\\d+)$");
 
-	private static final PromptStore store =
-			new PromptStore() {
-				private Sub preface = new Sub();
-				private Sub templates = new Sub();
+	static PromptStore get() {
+		if (store == null) {
+			store = new BackedByEclipse(InstanceScope.INSTANCE.getNode("dev.equo.ide.chatgpt"));
+		}
+		return store;
+	}
 
-				{
-					preface.values.putAll(defaultPrefaces);
-					templates.values.putAll(defaultTemplates);
-				}
+	private static PromptStore store;
 
-				@Override
-				Sub get(Type type) {
-					return type.prefaceTemplate(preface, templates);
+	public static class BackedByEclipse extends PromptStore {
+		private final IEclipsePreferences rootPreferences;
+		private final Sub prefaces, templates;
+
+		BackedByEclipse(IEclipsePreferences preferences) {
+			this.rootPreferences = preferences;
+			prefaces = parse(preferences.node("prefaces"));
+			templates = parse(preferences.node("templates"));
+			prefaces.values.putAll(defaultPrefaces);
+			templates.values.putAll(defaultTemplates);
+		}
+
+		private Sub parse(Preferences preferences) {
+			var sub = new Sub();
+			for (String key : Errors.rethrow().get(preferences::keys)) {
+				sub.put(key, preferences.get(key, null));
+			}
+			return sub;
+		}
+
+		@Override
+		void save() throws BackingStoreException {
+			save(rootPreferences.node("prefaces"), prefaces, defaultPrefaces);
+			save(rootPreferences.node("templates"), templates, defaultTemplates);
+		}
+
+		private void save(Preferences preferences, Sub sub, Map<String, String> defaults)
+				throws BackingStoreException {
+			for (String key : preferences.keys()) {
+				if (!sub.values.containsKey(key)) {
+					preferences.remove(key);
 				}
-			};
+			}
+			for (Map.Entry<String, String> entry : sub.values.entrySet()) {
+				if (!defaults.containsKey(entry.getKey())) {
+					preferences.put(entry.getKey(), entry.getValue());
+				}
+			}
+			preferences.flush();
+		}
+
+		@Override
+		Sub get(Type type) {
+			return type.prefaceTemplate(prefaces, templates);
+		}
+	}
 }
