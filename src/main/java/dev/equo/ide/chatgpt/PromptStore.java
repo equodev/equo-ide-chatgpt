@@ -174,7 +174,7 @@ public abstract class PromptStore {
 			values.remove(key);
 		}
 
-		String newKey(String keySimilarTo, String content) {
+		public String newKey(String keySimilarTo, String content) {
 			if (!values.containsKey(keySimilarTo)) {
 				values.put(keySimilarTo, content);
 				return keySimilarTo;

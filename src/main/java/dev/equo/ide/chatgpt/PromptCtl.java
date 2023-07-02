@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Text;
 
 public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 	private final Combo prefaceCombo, templateCombo;
+	private final Link saveAs;
 	private final Text templateTxt;
 	final DragFileCtl dragFileCtl;
 	final Link switchToBrowser;
@@ -51,9 +52,22 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		prefaceCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
 		Layouts.setGridData(prefaceCombo).grabHorizontal();
 
-		var templateLbl = new Label(wrapped, SWT.NONE);
+		var templateRow = new Composite(wrapped, SWT.NONE);
+		Layouts.setGridData(templateRow).grabHorizontal().verticalIndent(Layouts.defaultMargin());
+		Layouts.setGrid(templateRow).margin(0).numColumns(2);
+
+		var templateLbl = new Label(templateRow, SWT.NONE);
 		templateLbl.setText("Template");
-		Layouts.setGridData(templateLbl).verticalIndent(Layouts.defaultMargin());
+		Layouts.setGridData(templateLbl).grabHorizontal();
+
+		saveAs = new Link(templateRow, SWT.NONE);
+		saveAs.setText("<a>Save as</a>");
+		saveAs.addListener(
+				SWT.Selection,
+				e -> {
+					saveAs();
+				});
+
 		templateCombo = new Combo(wrapped, SWT.READ_ONLY | SWT.FLAT);
 		Layouts.setGridData(templateCombo).grabHorizontal();
 
@@ -61,6 +75,7 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		templateTxt = new Text(templateContainer, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		Layouts.setSingleNoMargin(templateContainer);
 		Layouts.setGridData(templateContainer).grabAll();
+		templateTxt.setFocus();
 
 		dragFileCtl = new DragFileCtl(wrapped);
 		Layouts.setGridData(dragFileCtl).grabHorizontal().verticalIndent(Layouts.defaultMargin());
@@ -99,6 +114,7 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 					SWT.Selection,
 					e -> {
 						var idx = combo.getSelectionIndex();
+						saveAs.setVisible(idx == freeformIdx);
 						if (idx == sub.list().size()) {
 							PromptPreferencePage.openDialog(finalType);
 							combo.select(store.getSelection(finalType));
@@ -114,22 +130,36 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 		templateTxt.addListener(
 				SWT.Modify,
 				e -> {
-					String key = templateCombo.getItem(templateCombo.getSelectionIndex());
-					if (!key.equals(PromptStore.FREEFORM)) {
+					var idx = templateCombo.getSelectionIndex();
+					if (idx != freeformIdx) {
+						String key = templateCombo.getItem(idx);
 						String storeContent = store.get(PromptStore.Type.TEMPLATE).get(key);
 						String uiContent = templateTxt.getText();
 						if (storeContent.equals(uiContent)) {
 							return;
 						}
-						int freeformIdx = Arrays.asList(templateCombo.getItems()).indexOf(PromptStore.FREEFORM);
 						store.setSelection(PromptStore.Type.TEMPLATE, freeformIdx);
 						templateCombo.select(freeformIdx);
 						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, uiContent);
+						saveAs.setVisible(true);
 					} else {
 						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, templateTxt.getText());
 					}
 				});
 		wrapped.addListener(SWT.Dispose, e -> store.save());
+	}
+
+	private int freeformIdx;
+
+	private void saveAs() {
+		String newName = DialogMisc.blockForSaveAs(getShell());
+		if (newName != null) {
+			String newKey = store.get(PromptStore.Type.TEMPLATE).newKey(newName, templateTxt.getText());
+			refreshData();
+			int newKeyIdx = Arrays.asList(templateCombo.getItems()).indexOf(newKey);
+			templateCombo.select(newKeyIdx);
+			saveAs.setVisible(false);
+		}
 	}
 
 	private void refreshData() {
@@ -146,6 +176,8 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 				templateTxt.setText(sub.get(sub.list().get(selectionIdx)));
 			}
 		}
+		freeformIdx = Arrays.asList(templateCombo.getItems()).indexOf(PromptStore.FREEFORM);
+		saveAs.setVisible(templateCombo.getSelectionIndex() == freeformIdx);
 	}
 
 	String prompt() {

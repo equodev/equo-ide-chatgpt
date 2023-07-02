@@ -112,6 +112,16 @@ class DialogMisc {
 	}
 
 	public static String blockForRename(String activeKey, Shell parent) {
+		return blockForString(
+				"Rename " + activeKey, "Rename " + activeKey + " to:", activeKey, "Rename", parent);
+	}
+
+	public static String blockForSaveAs(Shell parent) {
+		return blockForString("Save as", "Save as:", "", "Save", parent);
+	}
+
+	private static String blockForString(
+			String title, String description, String initial, String actionBtn, Shell parent) {
 		Box.Nullable<String> newName = Box.Nullable.ofNull();
 		Shells.builder(
 						SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL,
@@ -119,11 +129,11 @@ class DialogMisc {
 							Layouts.setGrid(cmp);
 
 							var label = new Label(cmp, SWT.WRAP);
-							label.setText("Rename " + activeKey + " to:");
+							label.setText(description);
 							Layouts.setGridData(label).grabHorizontal();
 
 							var text = new Text(cmp, SWT.BORDER | SWT.SINGLE);
-							text.setText(activeKey);
+							text.setText(initial);
 							Layouts.setGridData(text).grabHorizontal();
 
 							Layouts.newGridRow(
@@ -138,7 +148,7 @@ class DialogMisc {
 													cmp.getShell().dispose();
 												});
 										var rename = new Button(buttons, SWT.PUSH);
-										rename.setText("Rename");
+										rename.setText(actionBtn);
 										rename.addListener(
 												SWT.Selection,
 												e -> {
@@ -152,7 +162,7 @@ class DialogMisc {
 										Layouts.setGridData(rename).widthHint(SwtMisc.defaultButtonWidth());
 									});
 						})
-				.setTitle("Rename " + activeKey)
+				.setTitle(title)
 				.setSize(SwtMisc.defaultDialogWidth(), SWT.DEFAULT)
 				.openOnBlocking(parent);
 		return newName.get();
