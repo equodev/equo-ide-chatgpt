@@ -201,11 +201,12 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 							String newKey = store.get(activeType).newKey(activeKey, text.getText());
 							setActive(activeType, newKey);
 						});
+				toolbar.getParent().layout();
 			}
 		}
 
 		private void delete() {
-			if (SwtMisc.blockForQuestion(
+			if (DialogMisc.blockForQuestion(
 					"Confirm delete", "Are you sure you want to delete " + activeKey + "?", getShell())) {
 				store.get(activeType).remove(activeKey);
 				String[] items = templates.getItems();
