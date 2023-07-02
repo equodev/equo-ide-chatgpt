@@ -103,6 +103,13 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 			templatesItem.setText("Templates");
 
 			templates = new List(left, SWT.NONE);
+			templates.addListener(
+					SWT.KeyDown,
+					e -> {
+						if (e.keyCode == SWT.DEL) {
+							delete();
+						}
+					});
 			SiliconFix.fix(templates);
 			Layouts.setGridData(templates).grabAll();
 
@@ -142,8 +149,10 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 
 		private void storeCurrent() {
 			var sub = store.get(activeType);
-			sub.put(activeKey, text.getText());
-			selection.put(activeType, sub.list().get(templates.getSelectionIndex()));
+			if (sub.get(activeKey) != null) {
+				sub.put(activeKey, text.getText());
+				selection.put(activeType, sub.list().get(templates.getSelectionIndex()));
+			}
 		}
 
 		private void setActive(PromptStore.Type type, String key) {
@@ -176,6 +185,11 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 				} else {
 					var delete = new ToolItem(toolbar, SWT.PUSH);
 					delete.setText("Delete");
+					delete.addListener(
+							SWT.Selection,
+							e -> {
+								delete();
+							});
 					var rename = new ToolItem(toolbar, SWT.PUSH);
 					rename.setText("Rename");
 				}
@@ -187,6 +201,22 @@ public class PromptPreferencePage extends PreferencePage implements IWorkbenchPr
 							String newKey = store.get(activeType).newKey(activeKey, text.getText());
 							setActive(activeType, newKey);
 						});
+			}
+		}
+
+		private void delete() {
+			if (SwtMisc.blockForQuestion(
+					"Confirm delete", "Are you sure you want to delete " + activeKey + "?", getShell())) {
+				store.get(activeType).remove(activeKey);
+				String[] items = templates.getItems();
+				int selectionIdx = templates.getSelectionIndex();
+				String toSelect;
+				if (selectionIdx == items.length - 1) {
+					toSelect = items[items.length - 2];
+				} else {
+					toSelect = items[selectionIdx + 1];
+				}
+				setActive(activeType, toSelect);
 			}
 		}
 

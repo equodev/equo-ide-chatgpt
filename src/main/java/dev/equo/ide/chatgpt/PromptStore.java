@@ -192,6 +192,10 @@ public abstract class PromptStore {
 			values.put(key, value);
 		}
 
+		public void remove(String key) {
+			values.remove(key);
+		}
+
 		String newKey(String keySimilarTo, String content) {
 			if (!values.containsKey(keySimilarTo)) {
 				values.put(keySimilarTo, content);
