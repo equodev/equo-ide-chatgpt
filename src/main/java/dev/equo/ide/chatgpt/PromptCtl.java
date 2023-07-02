@@ -124,7 +124,7 @@ public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 						int freeformIdx = Arrays.asList(templateCombo.getItems()).indexOf(PromptStore.FREEFORM);
 						store.setSelection(PromptStore.Type.TEMPLATE, freeformIdx);
 						templateCombo.select(freeformIdx);
-						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, templateTxt.getText());
+						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, uiContent);
 					} else {
 						store.get(PromptStore.Type.TEMPLATE).put(PromptStore.FREEFORM, templateTxt.getText());
 					}
