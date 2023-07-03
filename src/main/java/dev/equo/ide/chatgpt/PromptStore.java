@@ -219,10 +219,14 @@ public abstract class PromptStore {
 			this.rootPreferences = preferences;
 			prefaces = parse(preferences.node("prefaces"));
 			templates = parse(preferences.node("templates"));
-			setSelection(Type.PREFACE, preferences.getInt("prefaces-selection", 0));
-			setSelection(Type.TEMPLATE, preferences.getInt("templates-selection", 0));
 			prefaces.values.putAll(defaultPrefaces);
 			templates.values.putAll(defaultTemplates);
+
+			int defaultPreface = prefaces.list().indexOf("Java terse");
+			int defaultTemplate = templates.list().indexOf("Test JUnit 5");
+
+			setSelection(Type.PREFACE, preferences.getInt("prefaces-selection", defaultPreface));
+			setSelection(Type.TEMPLATE, preferences.getInt("templates-selection", defaultTemplate));
 		}
 
 		private Sub parse(Preferences preferences) {
