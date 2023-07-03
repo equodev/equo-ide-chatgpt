@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
-public class PromptCtl extends ControlWrapper.AroundControl<Composite> {
+class PromptCtl extends ControlWrapper.AroundControl<Composite> {
 	private final Combo prefaceCombo, templateCombo;
 	private final Link saveAs;
 	private final Text templateTxt;

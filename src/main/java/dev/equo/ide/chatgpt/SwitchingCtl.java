@@ -33,7 +33,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-public class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
+class SwitchingCtl extends ControlWrapper.AroundWrapper<CoatMux> {
 
 	private final CoatMux.Layer<GptWrapperCtl> gpt;
 	final CoatMux.Layer<PromptCtl> prompt;

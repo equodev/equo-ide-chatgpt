@@ -37,7 +37,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 
-public abstract class PromptStore {
+abstract class PromptStore {
 	public static final String NONE = "(None)";
 	public static final String FREEFORM = "(Freeform)";
 	public static final String DIALOG = "(Dialog...)";
