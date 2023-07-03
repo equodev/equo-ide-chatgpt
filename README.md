@@ -7,7 +7,7 @@ This plugin makes it easy to use ChatGPT as a coding assistant with Eclipse. You
 
 You can drag files from the package explorer and drop them right into prompts. For a demo of this plugin in action along with GitHub Copilot-style autocompletion provided by Tabnine, see [eclipse-ai-example](https://github.com/equodev/eclipse-ai-example).
 
-![screenshot of the ChatGPT plugin in action](screeenshot.png)
+![screenshot of the ChatGPT plugin in action](.github/demo_screencast.gif)
 
 ## Installation
 
