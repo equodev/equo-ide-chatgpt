@@ -22,7 +22,15 @@
 package dev.equo.ide.chatgpt;
 
 import dev.equo.ide.IdeHookInstantiated;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 public class ChatGptIdeHookImpl implements IdeHookInstantiated {
 	public ChatGptIdeHookImpl(ChatGptIdeHook hook) {}
+
+	@Override
+	public void postStartup() throws Exception {
+		IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		activeWorkbenchWindow.getActivePage().showView("dev.equo.ide.chatgpt.views.browser", null, 1);
+	}
 }

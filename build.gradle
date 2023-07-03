@@ -17,6 +17,7 @@ apply from: 干.file('spotless.gradle')
 
 jar.manifest.attributes(
 		'Bundle-SymbolicName':    'dev.equo.ide.chatgpt; singleton:=true',
+		'Bundle-IdeHook':         'dev.equo.ide.chatgpt.ChatGptIdeHook',
 		'Bundle-Version':         spotlessChangelog.versionNext,
 		'Implementation-Version': spotlessChangelog.versionNext)
 
@@ -39,13 +40,17 @@ repositories {
 
 import com.diffplug.common.swt.os.SwtPlatform
 
+String VER_DURIAN = '1.2.0'
 dependencies {
 	compileOnly "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
 	testImplementation "com.equo:com.equo.chromium:$VER_EQUO_CHROMIUM"
 	testImplementation "com.equo:com.equo.chromium.cef.${SwtPlatform.getRunning()}:$VER_EQUO_CHROMIUM"
 	implementation "dev.equo.ide:solstice:$VER_SOLSTICE"
 	implementation "com.diffplug.durian:durian-swt:$VER_DURIAN_SWT"
-	implementation "com.diffplug.durian:durian-collect:1.2.0"
+	implementation "com.diffplug.durian:durian-rx:4.0.1"
+	implementation "com.diffplug.durian:durian-core:$VER_DURIAN"
+	implementation "com.diffplug.durian:durian-collect:$VER_DURIAN"
+	implementation "com.diffplug.durian:durian-concurrent:$VER_DURIAN"
 	testImplementation "org.junit.jupiter:junit-jupiter:$VER_JUNIT"
 	testImplementation "org.assertj:assertj-core:$VER_ASSERTJ"
 }
@@ -66,5 +71,5 @@ apply plugin: 'dev.equo.ide'
 equoIde {
 	gradleBuildship().autoImport('.')
 	equoChromium()
-	dogfood().ideHook('dev.equo.ide.chatgpt.ChatGptIdeHook')
+	dogfood()
 }

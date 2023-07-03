@@ -21,19 +21,20 @@
  *******************************************************************************/
 package dev.equo.ide.chatgpt;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.part.ViewPart;
+import com.diffplug.common.swt.InteractiveTest;
+import com.diffplug.common.swt.Layouts;
+import org.junit.jupiter.api.Test;
 
-public class ChatGptView extends ViewPart {
-	private SwitchingCtl ctl;
-
-	@Override
-	public void createPartControl(Composite parent) {
-		ctl = new SwitchingCtl(parent);
-	}
-
-	@Override
-	public void setFocus() {
-		ctl.getRootControl().setFocus();
+public class PromptPreferenceCtlTest {
+	@Test
+	public void testTab() {
+		InteractiveTest.testCoat(
+				"Should be a browser which loads the chatgpt page",
+				35,
+				20,
+				cmp -> {
+					Layouts.setFill(cmp);
+					new PromptPreferencePage.Ctl(cmp, PromptStore.get());
+				});
 	}
 }

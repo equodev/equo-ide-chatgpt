@@ -25,15 +25,16 @@ import com.diffplug.common.swt.InteractiveTest;
 import com.diffplug.common.swt.Layouts;
 import org.junit.jupiter.api.Test;
 
-public class ChatGptCtlTest {
+public class SwitchCtlTest {
 	@Test
 	public void testTab() {
 		InteractiveTest.testCoat(
 				"Should be a browser which loads the chatgpt page",
+				15,
+				30,
 				cmp -> {
-					Layouts.setGrid(cmp);
-					var ctl = new ChatGptDndCtl(cmp);
-					Layouts.setGridData(ctl).grabAll();
+					Layouts.setFill(cmp);
+					new SwitchingCtl(cmp);
 				});
 	}
 }
