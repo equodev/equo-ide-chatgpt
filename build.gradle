@@ -3,6 +3,9 @@ plugins {
 	id 'com.diffplug.spotless-changelog'
 }
 
+spotlessChangelog {
+	forceNextVersion '1.0.0'
+}
 apply from: 干.file('changelog.gradle')
 
 apply plugin: 'java'
