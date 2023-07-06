@@ -1,11 +1,11 @@
-# ChatGPT plugin for Eclipse / [EquoIDE](https://github.com/equodev/equo-ide)
+# ChatGPT plugin for Eclipse / [EquoIDE](https://github.com/equodev/equo-ide#quickstart)
 
 [![Maven Plugin](https://img.shields.io/maven-central/v/dev.equo.ide/equo-ide-chatgpt?color=blue&label=dev.equo.ide%3Aequo-ide-chatgpt)](https://search.maven.org/artifact/dev.equo.ide/equo-ide-chatgpt)
 [![Changelog](https://img.shields.io/badge/changelog-here-blue)](CHANGELOG.md)
 
 This plugin makes it easy to use ChatGPT as a coding assistant with Eclipse. You do not need an OpenAI API key, just a free ChatGPT account. The only way to access GPT-4 without a waitlist is the $20 per month ChatGPT Plus account, and you can use that in this plugin.
 
-You can drag files from the package explorer and drop them right into prompts. For a demo of this plugin in action along with GitHub Copilot-style autocompletion provided by Tabnine, see [eclipse-ai-example](https://github.com/equodev/eclipse-ai-example).
+You can drag files from the package explorer and drop them right into prompts. For a demo of this plugin in action along with GitHub Copilot-style autocompletion provided by Tabnine, see [eclipse-ai-example](https://github.com/equodev/eclipse-ai-example#chatgpt-inside-the-ide).
 
 ![screenshot of the ChatGPT plugin in action](.github/demo_screencast.gif)
 
@@ -28,4 +28,4 @@ PR's are welcome, and will be merged and released in a timely fashion. Run `grad
 
 This component's licensing is a bit unusual.
 
-In order to bridge the Eclipse IDE and ChatGPT's web interface, we use [Equo Chromium](https://www.equo.dev/chromium), which is available under either a commercial license or GPL. This plugin is therefore licensed under the GPL with explicit permission to combine the work with Eclipse, as per the [FSF's recommendation](https://www.fsf.org/blogs/licensing/using-the-gpl-for-eclipse-plug-ins). 
+In order to bridge the Eclipse IDE and ChatGPT's web interface, we use [Equo Chromium](https://www.equo.dev/chromium), which is available under either a commercial license or GPL. This plugin is therefore licensed under the GPL with explicit permission to combine the work with Eclipse, as per the [FSF's recommendation](https://www.fsf.org/blogs/licensing/using-the-gpl-for-eclipse-plug-ins).
