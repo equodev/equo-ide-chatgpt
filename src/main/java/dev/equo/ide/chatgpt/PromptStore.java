@@ -150,7 +150,7 @@ abstract class PromptStore {
 					"Modernize",
 					"Rewrite the following class using the latest syntax constructs from Java 11. Examples to modernize:\n\n"
 							+ "- use `var` instead of explicit type declarations where possible\n"
-							+ "- use `List<T>` instead of `Array<T>`\n"
+							+ "- use `List<T>` instead of raw arrays `T[]`\n"
 							+ "- use collection literals such as `List.of()`, `Set.of()`, and `Map.of()` when appropriate",
 					"Describe",
 					"Describe the functionality of the following class. Call special attention to any unusual aspects of the design if they are present.");
